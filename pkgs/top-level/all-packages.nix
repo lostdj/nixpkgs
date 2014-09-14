@@ -9380,8 +9380,6 @@ let
 
   shotcut = callPackage ../applications/video/shotcut { mlt = mlt-qt5; };
 
-  smartgithg = callPackage ../applications/version-management/smartgithg { };
-
   smplayer = callPackage ../applications/video/smplayer { };
 
   sup = with rubyLibs; callPackage ../applications/networking/mailreaders/sup {
@@ -9735,6 +9733,8 @@ let
   slim = callPackage ../applications/display-managers/slim {
     libpng = libpng12;
   };
+
+  smartgithg = callPackage ../applications/version-management/smartgithg { };
 
   smartdeblur = callPackage ../applications/graphics/smartdeblur { };
 
