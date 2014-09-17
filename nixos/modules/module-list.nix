@@ -9,6 +9,7 @@
   ./config/i18n.nix
   ./config/krb5.nix
   ./config/ldap.nix
+  ./config/my.nix
   ./config/networking.nix
   ./config/no-x-libs.nix
   ./config/nsswitch.nix
