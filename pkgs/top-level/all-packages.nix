@@ -3092,6 +3092,8 @@ let
 
   oraclejdk7 = pkgs.oraclejdk7distro true false;
 
+  oraclejdk7_32 = pkgs.oraclejdk7distro_32 true false;
+
   oraclejdk8 = pkgs.oraclejdk8distro true false;
 
   oraclejre = lowPrio (pkgs.jdkdistro false false);
@@ -3115,6 +3117,11 @@ let
     assert supportsJDK;
     (if pluginSupport then appendToName "with-plugin" else x: x)
       (callPackage ../development/compilers/oraclejdk/jdk7-linux.nix { inherit installjdk; });
+
+  oraclejdk7distro_32 = installjdk: pluginSupport:
+    assert supportsJDK;
+    (if pluginSupport then appendToName "with-plugin" else x: x)
+      (callPackage_i686 ../development/compilers/oraclejdk/jdk7-linux.nix { inherit installjdk; });
 
   oraclejdk8distro = installjdk: pluginSupport:
     assert supportsJDK;
