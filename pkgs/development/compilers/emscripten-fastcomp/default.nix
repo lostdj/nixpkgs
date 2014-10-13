@@ -1,7 +1,7 @@
 { stdenv, fetchgit, python }:
 
 let
-  tag = "1.21.0";
+  tag = "1.25.1";
 in
 
 stdenv.mkDerivation rec {
