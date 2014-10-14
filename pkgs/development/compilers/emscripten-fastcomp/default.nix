@@ -10,13 +10,13 @@ stdenv.mkDerivation rec {
   srcFC = fetchgit {
     url = git://github.com/kripken/emscripten-fastcomp;
     rev = "refs/tags/${tag}";
-    sha256 = "0mcxzg2cfg0s1vfm3bh1ar4xsddb6xkv1dsdbgnpx38lbj1mvfs1";
+    sha256 = "3562617087ac09643dcc5a4527fd906eeb71f165fe33ea94c1a73f22e20c3e8c";
   };
 
   srcFL = fetchgit {
     url = git://github.com/kripken/emscripten-fastcomp-clang;
     rev = "refs/tags/${tag}";
-    sha256 = "0s2jcn36d236cfpryjpgaazjp3cg83d0h78g6kk1j6vdppv3vgnp";
+    sha256 = "4291cce2205b19aec9a78895822af690e325408232547aded1774216f68cf541";
   };
 
   buildInputs = [ python ];

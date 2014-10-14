@@ -10,7 +10,7 @@ stdenv.mkDerivation rec {
   src = fetchgit {
     url = git://github.com/kripken/emscripten;
     rev = "refs/tags/${tag}";
-    sha256 = "0y17ab4nhd3521b50sv2i2667w0rlcnmlkpkgw5j3fsh8awxgf32";
+    sha256 = "c0901a932ab3d855166e02af8d862dbbc0c84756942982acac5766d6d1833c22";
   };
 
   buildCommand = ''
