@@ -3092,6 +3092,7 @@ let
 
   oraclejdk7 = pkgs.oraclejdk7distro true false;
 
+  # mymod
   oraclejdk7_32 = pkgs.oraclejdk7distro_32 true false;
 
   oraclejdk8 = pkgs.oraclejdk8distro true false;
