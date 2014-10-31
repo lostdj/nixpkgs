@@ -6,8 +6,8 @@
 
 cabal.mkDerivation (self: {
   pname = "rest-types";
-  version = "1.10.2";
-  sha256 = "1j8fpv4xdhbf1awy0v9zn9a3sjwl42l6472wczp3wwwcpsi65d9q";
+  version = "1.11.1";
+  sha256 = "1dqjch3h3hv4s1v0wkbd4spn26f068bqpsz6mr0vdacdbhjwnigg";
   buildDepends = [
     aeson genericAeson hxt jsonSchema mtl regular regularXmlpickler
     restStringmap text uuid
@@ -17,5 +17,6 @@ cabal.mkDerivation (self: {
     description = "Silk Rest Framework Types";
     license = self.stdenv.lib.licenses.bsd3;
     platforms = self.ghc.meta.platforms;
+    maintainers = with self.stdenv.lib.maintainers; [ aycanirican ];
   };
 })

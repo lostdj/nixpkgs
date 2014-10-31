@@ -1,5 +1,6 @@
 { fetchurl, stdenv, pkgconfig
-, openssl, db48, boost, zlib, miniupnpc, qt4, qrencode, glib, protobuf, utillinux }:
+, openssl, db48, boost, zlib, miniupnpc, qt4, qrencode, glib, protobuf
+, utillinux, autogen, autoconf, autobuild, automake, db }:
 
 with stdenv.lib;
 
@@ -78,23 +79,5 @@ in rec {
       homepage = http://namecoin.info;
     };
   };
-
-  dogecoin = buildAltcoin rec {
-    walletName = "dogecoin";
-    version = "1.4";
-
-    src = fetchurl {
-      url = "https://github.com/dogecoin/dogecoin/archive/1.4.tar.gz";
-      sha256 = "4af983f182976c98f0e32d525083979c9509b28b7d6faa0b90c5bd40b71009cc";
-    };
-
-    meta = {
-      description = "Wow, such coin, much shiba, very rich";
-      longDescription = "wow";
-      homepage = http://www.dogecoin.com/;
-      maintainers = [ maintainers.offline maintainers.edwtjo ];
-    };
-  };
-  dogecoind = dogecoin.override { gui = false; };
 
 }

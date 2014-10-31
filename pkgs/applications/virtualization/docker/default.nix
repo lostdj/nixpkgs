@@ -1,13 +1,13 @@
 { stdenv, fetchurl, makeWrapper, go, lxc, sqlite, iproute, bridge_utils, devicemapper,
-btrfsProgs, iptables, bash, e2fsprogs}:
+btrfsProgs, iptables, bash, e2fsprogs, xz}:
 
 stdenv.mkDerivation rec {
   name = "docker-${version}";
-  version = "1.2.0";
+  version = "1.3.0";
 
   src = fetchurl {
     url = "https://github.com/dotcloud/docker/archive/v${version}.tar.gz";
-    sha256 = "1nk74p9k17bllgw4992ixx7z3w87icp2wabbpbgfyi20k2q9mayp";
+    sha256 = "09bn88i8acv7kw39js1p7mgf3sglq7d782xnafkp0i97svf0x4y9";
   };
 
   buildInputs = [ makeWrapper go sqlite lxc iproute bridge_utils devicemapper btrfsProgs iptables e2fsprogs];
@@ -17,14 +17,14 @@ stdenv.mkDerivation rec {
   buildPhase = ''
     patchShebangs ./hack
     export AUTO_GOPATH=1
-    export DOCKER_GITCOMMIT="fa7b24f"
+    export DOCKER_GITCOMMIT="c78088f"
     ./hack/make.sh dynbinary
   '';
 
   installPhase = ''
-    install -Dm755 ./bundles/${version}/dynbinary/docker-${version} $out/bin/docker
-    install -Dm755 ./bundles/${version}/dynbinary/dockerinit-${version} $out/bin/dockerinit
-    wrapProgram $out/bin/docker --prefix PATH : "${iproute}/sbin:sbin:${lxc}/bin:${iptables}/sbin:${e2fsprogs}/sbin"
+    install -Dm755 ./bundles/${version}/dynbinary/docker-${version} $out/libexec/docker/docker
+    install -Dm755 ./bundles/${version}/dynbinary/dockerinit-${version} $out/libexec/docker/dockerinit
+    makeWrapper $out/libexec/docker/docker $out/bin/docker --prefix PATH : "${iproute}/sbin:sbin:${lxc}/bin:${iptables}/sbin:${e2fsprogs}/sbin:${xz}/bin"
 
     # systemd
     install -Dm644 ./contrib/init/systemd/docker.service $out/etc/systemd/system/docker.service

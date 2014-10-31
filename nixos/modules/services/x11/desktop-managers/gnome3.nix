@@ -77,11 +77,11 @@ in {
     services.gnome3.tracker.enable = mkDefault true;
     hardware.pulseaudio.enable = mkDefault true;
     services.telepathy.enable = mkDefault true;
-    networking.networkmanager.enable = true;
+    networking.networkmanager.enable = mkDefault true;
     services.upower.enable = config.powerManagement.enable;
     services.upower.package = gnome3.upower;
 
-    fonts.fonts = [ pkgs.dejavu_fonts ];
+    fonts.fonts = [ pkgs.dejavu_fonts pkgs.cantarell_fonts ];
 
     services.xserver.desktopManager.session = singleton
       { name = "gnome3";

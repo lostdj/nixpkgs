@@ -11,8 +11,8 @@
 
 cabal.mkDerivation (self: {
   pname = "keter";
-  version = "1.3.3";
-  sha256 = "1i4yjzqp8if0h88k8ga0dvqbrh57nvcr9dbfbj1sdw40pd74yb3i";
+  version = "1.3.5";
+  sha256 = "0jbf9x50gy9qja6gazh0lgyffz46a3wps6hbxppqmcicjhwbpvr5";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [

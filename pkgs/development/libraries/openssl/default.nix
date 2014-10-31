@@ -2,7 +2,7 @@
 , withCryptodev ? false, cryptodevHeaders }:
 
 let
-  name = "openssl-1.0.1i";
+  name = "openssl-1.0.1j";
 
   opensslCrossSystem = stdenv.lib.attrByPath [ "openssl" "system" ]
     (throw "openssl needs its platform name cross building" null)
@@ -43,7 +43,7 @@ stdenv.mkDerivation {
       "http://www.openssl.org/source/${name}.tar.gz"
       "http://openssl.linux-mirror.org/source/${name}.tar.gz"
     ];
-    sha256 = "1izwv1wzqdw8aqnvb70jcqpqp0rvkcm22w5c1dm9l1kpr939y5rw";
+    sha256 = "1wzdaiix40lz0rsyf51qv0wiq4ywp29j5ni0xzl06vxsi63wlq0v";
   };
 
   patches = patchesCross false;
@@ -60,7 +60,12 @@ stdenv.mkDerivation {
     else "./config";
 
   configureFlags = "shared --libdir=lib --openssldir=etc/ssl" +
-    stdenv.lib.optionalString withCryptodev " -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS";
+    stdenv.lib.optionalString withCryptodev " -DHAVE_CRYPTODEV -DUSE_CRYPTODEV_DIGESTS" +
+    stdenv.lib.optionalString (stdenv.system == "x86_64-cygwin") " no-asm";
+
+  preBuild = stdenv.lib.optionalString (stdenv.system == "x86_64-cygwin") ''
+    sed -i -e "s|-march=i486|-march=x86-64|g" Makefile
+  '';
 
   makeFlags = "MANDIR=$(out)/share/man";
 

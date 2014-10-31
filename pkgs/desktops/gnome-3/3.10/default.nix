@@ -102,7 +102,7 @@ rec {
 
   gucharmap = callPackage ./core/gucharmap { };
 
-  gvfs = pkgs.gvfs.override { gnome = pkgs.gnome3; lightWeight = false; };
+  gvfs = pkgs.gvfs.override { gnome = pkgs.gnome3; gnomeSupport = true; };
 
   eog = callPackage ./core/eog { };
 
@@ -132,7 +132,7 @@ rec {
 
   totem-pl-parser = callPackage ./core/totem-pl-parser { };
 
-  tracker = callPackage ./core/tracker { };
+  tracker = callPackage ./core/tracker { giflib = pkgs.giflib_5_0; };
 
   vte = callPackage ./core/vte { };
 
@@ -183,7 +183,9 @@ rec {
 
   gitg = callPackage ./misc/gitg { };
 
-  libgit2-glib = callPackage ./misc/libgit2-glib { };
+  libgit2-glib = callPackage ./misc/libgit2-glib {
+    libgit2 = pkgs.libgit2.override { libssh2 = null; };
+  };
 
   libmediaart = callPackage ./misc/libmediaart { };
   

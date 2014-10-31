@@ -1,4 +1,4 @@
-# This file is generated from generate_nix.rb
+# This file is generated from generate_nix.rb. DO NOT EDIT.
 # Execute the following command in a temporary directory to update the file.
 #
 # ruby generate_nix.rb > default.nix
@@ -40,118 +40,118 @@
 assert stdenv.isLinux;
 
 let
-  version = "31.0";
+  version = "31.2.0";
   sources = [
-    { locale = "nn-NO"; arch = "linux-i686"; sha256 = "a1e9954236de1d0581342fbb894b721528bc51a208d3bbedd4d8defbcc1cb50f"; }
-    { locale = "nn-NO"; arch = "linux-x86_64"; sha256 = "0fe9c22ad8cf575813ae8e476d985a3b951174df5beda67fd98e261f831252aa"; }
-    { locale = "lt"; arch = "linux-i686"; sha256 = "35fb5c44bc3ed25beec4f6172c44f75426579f27bd2302361870615bb1f62194"; }
-    { locale = "lt"; arch = "linux-x86_64"; sha256 = "3b04ffd5e1640c0138e5dab63a1059bd0342fff9f44547c6b34fbe6da810f911"; }
-    { locale = "ta-LK"; arch = "linux-i686"; sha256 = "2e8a1b96820216fda11c234d80a74d7326b49d7ac3f595f646aa10dccde61940"; }
-    { locale = "ta-LK"; arch = "linux-x86_64"; sha256 = "006f25951b4ac90b8d8d32491d260900dfcfb24c10cd4a10dbadf3840b4bcd4e"; }
-    { locale = "bn-BD"; arch = "linux-i686"; sha256 = "839e95de15a4e0287cfe36d70e07d1d40a1708016f615244a84553794ac76b4c"; }
-    { locale = "bn-BD"; arch = "linux-x86_64"; sha256 = "592a353df70c368c3c9855ead6d3b68433e7ebaaf42169108b9e74a83517230b"; }
-    { locale = "de"; arch = "linux-i686"; sha256 = "890bc1ee046ebf67079bd39ecb761a78fbf8cee8f72b32958ad18a0c3184b23b"; }
-    { locale = "de"; arch = "linux-x86_64"; sha256 = "7b52dfc2cea5bedae2ccfe11b0ec2d66edb81b76c2272c60f4bb247970384c9f"; }
-    { locale = "rm"; arch = "linux-i686"; sha256 = "6ab1e46650ff296719e498a1b9e5dad5c2f32e6be9d6fec12d1ab917a5f76872"; }
-    { locale = "rm"; arch = "linux-x86_64"; sha256 = "fdb170e3f546de759ef8a8aa85f6c3bf5152e121739cc27797c3065f4f85c183"; }
-    { locale = "nl"; arch = "linux-i686"; sha256 = "208be79ce95d45f4f69d8bf53d4e2f457410653a81117b4bd4d42bf14a1485dc"; }
-    { locale = "nl"; arch = "linux-x86_64"; sha256 = "2e562f9f59457d484ccfb1beb0129e2ca3ba4e5cbf5c955a65480836dc2e6567"; }
-    { locale = "sv-SE"; arch = "linux-i686"; sha256 = "07c7836bac31fa835c244dbe5eff19bad5dc5a9339cb8a94bd07d88f8590c867"; }
-    { locale = "sv-SE"; arch = "linux-x86_64"; sha256 = "7124de1e3cff7a5c17506f8e175aab1aaf96d4c9fd57824d6c0af110f47b1fbc"; }
-    { locale = "fy-NL"; arch = "linux-i686"; sha256 = "5d4e7f1f82b53161e84abf45f4a7210f0304399efed2df621c2e24cd5f1e1db0"; }
-    { locale = "fy-NL"; arch = "linux-x86_64"; sha256 = "814798f7dd066228ae73ce6bfdf430db4f0c4e905ce8a6670c73f894865dbf4e"; }
-    { locale = "si"; arch = "linux-i686"; sha256 = "35727d874cdeca69e18cedc109b6c3540c8dbb7450b2158cb1209cf00272cc38"; }
-    { locale = "si"; arch = "linux-x86_64"; sha256 = "0aa2232adc0e06c0a841a11155c2cd8f317b2f12b0e02c239ebe6150ad3bc278"; }
-    { locale = "vi"; arch = "linux-i686"; sha256 = "b45871e531b18a35f60240dc0417e5a9f08f8c9e3ea762a36e938425505df8b0"; }
-    { locale = "vi"; arch = "linux-x86_64"; sha256 = "a32dd96a41ed33a81c240c60c3538db45c1c4357ceaf37c8482a378a526c5454"; }
-    { locale = "br"; arch = "linux-i686"; sha256 = "3162753876da622895175afb60cd89be1ee343a10a45f9ac3feb3b306e161838"; }
-    { locale = "br"; arch = "linux-x86_64"; sha256 = "7c8d26a07d239f18f94f14696036974317ac1186072ba4482c315d02dcb97e5f"; }
-    { locale = "da"; arch = "linux-i686"; sha256 = "8cfaf98f3702b418bfd7692373b9f6e99a4b06e47a75a2df602e98d8f6acf761"; }
-    { locale = "da"; arch = "linux-x86_64"; sha256 = "6bd9ab36402f3391abc2e96f8786e16407736cf04d524e562736ac47279e2a26"; }
-    { locale = "fi"; arch = "linux-i686"; sha256 = "0a3e7c130197d4abcbf4d37eef51a946c11cf72707686f8c7a0caa9cc21e75c8"; }
-    { locale = "fi"; arch = "linux-x86_64"; sha256 = "8d4003960a8a7a496662b59834118c8712443761b867e5f54f3bf4a683715d22"; }
-    { locale = "he"; arch = "linux-i686"; sha256 = "5db77f9d117071feeddb5eadf74ea6332ccf9abaa441ba4d7b0a5f0f3781452d"; }
-    { locale = "he"; arch = "linux-x86_64"; sha256 = "46995a9f269f0385fc9ac9d31ee65d84e79ac81bd61892adaeb1afff991bcc82"; }
-    { locale = "zh-CN"; arch = "linux-i686"; sha256 = "73071beb9caa24aaac8eec9cfb01f7e333dc6ac438ab36e7f5afa7d850dbeb8e"; }
-    { locale = "zh-CN"; arch = "linux-x86_64"; sha256 = "a17cc26a51bbcff44837d74bdb35ba0ae10def6f4b536c4a67e9169221bd0afb"; }
-    { locale = "gl"; arch = "linux-i686"; sha256 = "4782b1f56c1f5fb1f802385d693a96b5013503e97e4d73e43fb90c3331aec839"; }
-    { locale = "gl"; arch = "linux-x86_64"; sha256 = "dbba59d0c697e6dc05bc2b554eed2c6040642cb1246a4119cd7c37b0451c6d4e"; }
-    { locale = "sl"; arch = "linux-i686"; sha256 = "b37a5eaf187d1c026990f55a3e993594a49bb689f1643d2f944c7f3c7cfd6819"; }
-    { locale = "sl"; arch = "linux-x86_64"; sha256 = "629132c5cc5f937fb504542662bb8aa7570eee1ae648087dbfb0c6dedadfa53c"; }
-    { locale = "cs"; arch = "linux-i686"; sha256 = "89e818736957569f91f7f329118b09a27b072c6d7c89f601eb02cd1d870c4088"; }
-    { locale = "cs"; arch = "linux-x86_64"; sha256 = "6a3a358227972a0eb60b1b531f322ebb2e604805bfb50b55d88cb8447b443105"; }
-    { locale = "ca"; arch = "linux-i686"; sha256 = "794b1e0be4bd6f8facebe3aa44f66a139a660d4fe75891f463adb5d7da7b32cb"; }
-    { locale = "ca"; arch = "linux-x86_64"; sha256 = "81b51a607844b229d026d9acec4ea1739c365a890857871260b6eca92a176e04"; }
-    { locale = "ar"; arch = "linux-i686"; sha256 = "924c5c47c76fc09f5a46176ef1a6e3466d783b8a4c08a5e660a03e0e84459116"; }
-    { locale = "ar"; arch = "linux-x86_64"; sha256 = "c46c2285a6f1c825e52ea6cd7dda31d6f67be15668ecf71883c55c9fa21a3fd5"; }
-    { locale = "tr"; arch = "linux-i686"; sha256 = "58a53bf3ad217b36beb9795f34349cfa3f10b7a39044f024c547be31b033ee28"; }
-    { locale = "tr"; arch = "linux-x86_64"; sha256 = "21d1f89810a284818c0a73e8abd5b51a9ea58b7db2b9bf6dd5e0119f4bfc13a3"; }
-    { locale = "ru"; arch = "linux-i686"; sha256 = "67cb3d38230d24c2a7615468ae2465e6f768904e3735ce31833dcba7b98023c5"; }
-    { locale = "ru"; arch = "linux-x86_64"; sha256 = "9e6b5351e96b9b2c57ce04fddaf9656adf84bc2a961a8ca614cec2f830d4e2a7"; }
-    { locale = "uk"; arch = "linux-i686"; sha256 = "80d0a09d93362f7eff9c7a20025080207a14c43e56b132c3962dd1d795d2a85c"; }
-    { locale = "uk"; arch = "linux-x86_64"; sha256 = "07d92405612e1000bc0b401481e94548877511ce224f19b23aa4fa192f21d489"; }
-    { locale = "fr"; arch = "linux-i686"; sha256 = "0d70e52c8dc5bf6f13c8ea2a5762cb94534ec54548c792ae181febc3d23c01cb"; }
-    { locale = "fr"; arch = "linux-x86_64"; sha256 = "2962de1886753b81684360ffbf97afa4d4371662a6f467ebc369e225d335745d"; }
-    { locale = "hr"; arch = "linux-i686"; sha256 = "6eacb202078be4de4a86c3fc957dbf482e32ab28805d719aa5d0d7f4fd832f48"; }
-    { locale = "hr"; arch = "linux-x86_64"; sha256 = "83ed10b7d9d74a28f9982a9d11840522f214ccb53ed599f9fce6ae26bd9d2298"; }
-    { locale = "el"; arch = "linux-i686"; sha256 = "227140594d1e12f2edf4e942327a8c64ab922796f7bda324eead8a299a6082ab"; }
-    { locale = "el"; arch = "linux-x86_64"; sha256 = "bc219c6795389fbdf20c4a84a61c350f376374285eff9aaedbc4893fdcbbdc24"; }
-    { locale = "et"; arch = "linux-i686"; sha256 = "4ac7de0edc1d2b084f38058f8c55e8c2fad0782a1f7f7ac69af5c6f28e2a71f9"; }
-    { locale = "et"; arch = "linux-x86_64"; sha256 = "cf026ebca03f6eb59b81073f754b9989f2023bb61d8dfaacbb28da3372abf43b"; }
-    { locale = "it"; arch = "linux-i686"; sha256 = "001f67664b02736aa757fa99ec00c8df023ead8f94113d1040092057031c4557"; }
-    { locale = "it"; arch = "linux-x86_64"; sha256 = "39fdd81738e0cea77c0f860f0e5253416daa6bd13f1e9feab4c6a52c6dd981f9"; }
-    { locale = "ja"; arch = "linux-i686"; sha256 = "0a5a830078e0774e81154f07055613d4b6dd6875be4ac976ac70883cfa0ed9cc"; }
-    { locale = "ja"; arch = "linux-x86_64"; sha256 = "a33890be6ac154862b7b80f864990b3bbad2db8adbf1d26bf2cd61b175db673e"; }
-    { locale = "bg"; arch = "linux-i686"; sha256 = "6f837f1c640c46dd99c4ab691ec6964e40b6d931830d4da604d4329c6d1ecde2"; }
-    { locale = "bg"; arch = "linux-x86_64"; sha256 = "a37294fbf0b358e5b9619aa36a20f92fc637a6b0697b8d607b958d256ce81225"; }
-    { locale = "nb-NO"; arch = "linux-i686"; sha256 = "2bbb5800b9a6d03545ca3dfc8f99f9f30c11e474ea360481f1f7e9610b0a87b0"; }
-    { locale = "nb-NO"; arch = "linux-x86_64"; sha256 = "e2a68f359f48a19437605b581bf9a8cf911feabfb2b15ec3724c60d1cbfe15ec"; }
-    { locale = "es-ES"; arch = "linux-i686"; sha256 = "976fbb88b1c75dc402b9eea76aef4d8a0886ee76bcf65d798a6ae8234b2b297a"; }
-    { locale = "es-ES"; arch = "linux-x86_64"; sha256 = "190679f7638b3697b236d971014f0da938aa2d664afb93e7f4d1c0fb51bfb46e"; }
-    { locale = "ro"; arch = "linux-i686"; sha256 = "530b19e48b0e49047746b2f5dd486cfb19930b1064478c465ce2acb21eac66ba"; }
-    { locale = "ro"; arch = "linux-x86_64"; sha256 = "0fe30abe10b4c97aef9ee40550205e0f269c5cfe76c08a36c8cf886a5af78558"; }
-    { locale = "en-GB"; arch = "linux-i686"; sha256 = "3f2d2784e3aa75cbd3ca0579d660b50b31e488253e52fedbfefc7c5448803967"; }
-    { locale = "en-GB"; arch = "linux-x86_64"; sha256 = "83e64293ed8d1ecf509e2617a71fed9583e4d4c3de3ae5b50175ad8c0f8322ae"; }
-    { locale = "gd"; arch = "linux-i686"; sha256 = "aa282b17eeeb185734f33d2ed9f287958d8a48ed82653d197426e3e3091ecba3"; }
-    { locale = "gd"; arch = "linux-x86_64"; sha256 = "c17db84f0cfd5525e4b8a08e300cabbbcd2bc45f59eb886e180eef0f8c4e45ef"; }
-    { locale = "be"; arch = "linux-i686"; sha256 = "909ae64789280db1a07b3b57dfa1a5d337fecd3bd59bacd3bab2eb72dbecb04f"; }
-    { locale = "be"; arch = "linux-x86_64"; sha256 = "9021a15bda3d4947e1ed6ee6666a252e3541b020d8d7eb58e854e426719f8d6d"; }
-    { locale = "pl"; arch = "linux-i686"; sha256 = "a3536d7e8bb429d562e7731fea8675dc9d442ca8e59cc72eb1b404da12d1d53a"; }
-    { locale = "pl"; arch = "linux-x86_64"; sha256 = "99cb049415e4837e615e1946409d1fd62966ae8eb843d89dfb61a6675b5b363f"; }
-    { locale = "pa-IN"; arch = "linux-i686"; sha256 = "06a17ca2ee8f44098252f24dae17589f32c80bd35e127a093c18161751a581fc"; }
-    { locale = "pa-IN"; arch = "linux-x86_64"; sha256 = "b8537b39f3e1242e3ed705ff919b01eb89ac72cf7c15ef0c44d258069c8ea317"; }
-    { locale = "ko"; arch = "linux-i686"; sha256 = "f2f1e9babb37f79121034f9b8cbc90fbf9f0fa1c152a7f0d7162aff6f6e33f1a"; }
-    { locale = "ko"; arch = "linux-x86_64"; sha256 = "60bc6bd468c820066e00f8108e0912df57a941b4150c06797a7958ec684c4969"; }
-    { locale = "sq"; arch = "linux-i686"; sha256 = "a88591a1850b56c68dd75b4ecff79a32d46dcb42f788d66bb46d45cd0f0d5672"; }
-    { locale = "sq"; arch = "linux-x86_64"; sha256 = "2bb7656dde363f3c3d3c8c8b4dbdb306f7e618491c917bc7c1b6e6f41d30fbf0"; }
-    { locale = "id"; arch = "linux-i686"; sha256 = "b396c752f7652e5ee31d6bec4bfb70b2d86438d966051f91e4d7a77ce5a924dc"; }
-    { locale = "id"; arch = "linux-x86_64"; sha256 = "1f0595e6953b0b6aa09577f180897760f8f85ba15e00e6ae3b12105c705cdac4"; }
-    { locale = "sk"; arch = "linux-i686"; sha256 = "4d3a4d283705889759dcb321e4b700896b132634005590e546bf6744e6187260"; }
-    { locale = "sk"; arch = "linux-x86_64"; sha256 = "456252e7bb5f29ef3c76afb2df0f406fcf93ef1c6df56d0f209bb85e91c8acce"; }
-    { locale = "en-US"; arch = "linux-i686"; sha256 = "ee93df33057576bd55bc80b71aeec7c6f487028f0fe52f679614811be5c71bae"; }
-    { locale = "en-US"; arch = "linux-x86_64"; sha256 = "7f7189250d76f970bfc1879b2ac6fe2d42bdcf3a652614fa4e080dcc636bbd4c"; }
-    { locale = "sr"; arch = "linux-i686"; sha256 = "cb389bd9712def87c06ffab3fc50b8fa58c773c6725fd0e0befec3e2ac957ef5"; }
-    { locale = "sr"; arch = "linux-x86_64"; sha256 = "8f9bf916357e7385dec5de9e4d58f6dfbe3c7fc6d2b66298304c3630189833e6"; }
-    { locale = "zh-TW"; arch = "linux-i686"; sha256 = "f89251f74b85c22a9f7b97b844a118e498698e205f733f1fb0d7a98787f973ee"; }
-    { locale = "zh-TW"; arch = "linux-x86_64"; sha256 = "019a15e1e83b6810de6a4d64deb3eba1a9c2a0c6f1c382582e356445e40d5bda"; }
-    { locale = "es-AR"; arch = "linux-i686"; sha256 = "ae1d03ddf4b424edc59e08c65a9fb20107311289e4faf8f06f14bc471b00d35f"; }
-    { locale = "es-AR"; arch = "linux-x86_64"; sha256 = "a19dce910ba5be35c0fd51be50bd96be3b3db84587f749ed9a108a14a3b732b7"; }
-    { locale = "ast"; arch = "linux-i686"; sha256 = "8cb4cb6a99955209026224a4cbbcab7b37b0b9fc38147eeaa439631be7750c08"; }
-    { locale = "ast"; arch = "linux-x86_64"; sha256 = "4520a3ae24cc7056eb87d48280999c2c3da6aa76b9182c291512dc80363efb27"; }
-    { locale = "ga-IE"; arch = "linux-i686"; sha256 = "8803a9477f6ac963bdacfd82f6e6b8aabb217fa6c39b311645e461f38cda3757"; }
-    { locale = "ga-IE"; arch = "linux-x86_64"; sha256 = "c8eae521293986be6d626302d91abbb88a12855565fd41c3614f7a5d7534f0cd"; }
-    { locale = "pt-BR"; arch = "linux-i686"; sha256 = "9ea7f173533757c99a9c2dfdceab5cc58e583f929a2e7db95184823a00319a0a"; }
-    { locale = "pt-BR"; arch = "linux-x86_64"; sha256 = "6b9775f8142273d118870887da2728da4732609395897513739df7b352a4989c"; }
-    { locale = "is"; arch = "linux-i686"; sha256 = "bcaeea579405f015fcdb78e16cfd92e4c0895614c5966a1a7049a4fe310b1c46"; }
-    { locale = "is"; arch = "linux-x86_64"; sha256 = "7de3a89ece968819fcd7f438aaa2f5762f9d936b20fb3c364467ac123b24182e"; }
-    { locale = "eu"; arch = "linux-i686"; sha256 = "af7f04ef648264f56dcb62e7e473586f3c5b13d3ecd2918278962f335dda7966"; }
-    { locale = "eu"; arch = "linux-x86_64"; sha256 = "8477854792552b471e4eb11f71c79b14544cf438e795feae3082c0f3a31e0c8a"; }
-    { locale = "hu"; arch = "linux-i686"; sha256 = "21db7e27557670796db9282174e7da04afe3a0c89b31e042f7bbd3992e4e08be"; }
-    { locale = "hu"; arch = "linux-x86_64"; sha256 = "8f05b160d346b45308ba0c7dbe531bce043f22abffd2a4d1200628669a3b4aa0"; }
-    { locale = "hy-AM"; arch = "linux-i686"; sha256 = "5e77c23bdb52dba7b663b574520972e2b78588e5143922c1e1837c0e0bd71a86"; }
-    { locale = "hy-AM"; arch = "linux-x86_64"; sha256 = "35e663dad586cce929baa1ec501b149ff586df15a687eb41a8cc619c542a625c"; }
-    { locale = "pt-PT"; arch = "linux-i686"; sha256 = "211322939ab3b4bfc3e6f0548356c9479db5deb687e1e2232f527462017dcd2d"; }
-    { locale = "pt-PT"; arch = "linux-x86_64"; sha256 = "0d50802a6fd7d9256591076c267759d39af91f680025b03ec6925e21c20494e4"; }
+    { locale = "tr"; arch = "linux-i686"; sha256 = "02dc838606507040c73ddff4a1b60fec7d6e613aa08da2ce1c76e9c367bc29e5"; }
+    { locale = "tr"; arch = "linux-x86_64"; sha256 = "a93243ab5b1d64a94bf10833d6b8985a65906d0be24bdcdd7b5babfb1d466bcd"; }
+    { locale = "nl"; arch = "linux-i686"; sha256 = "d675da8358bf4ed519ee49dcc2c2162075b5e9e0fca244b474322a7614f535da"; }
+    { locale = "nl"; arch = "linux-x86_64"; sha256 = "4e8f9e3f9fe851dc38deae42443cf884776e1d93abf34ce6963651a85afdc4a9"; }
+    { locale = "he"; arch = "linux-i686"; sha256 = "8a769559e73abfdb610891a23538ef38df3852ffb39d02cba96e6a8ec914f94a"; }
+    { locale = "he"; arch = "linux-x86_64"; sha256 = "e53b95914753b8640b69e104fbf5efb2fddcecc17eded23974c08274378105c2"; }
+    { locale = "bg"; arch = "linux-i686"; sha256 = "60deb9deb678c9e5233d9c0146aa4fc8a74b9ba9b5be43ed8c5a452039b8307d"; }
+    { locale = "bg"; arch = "linux-x86_64"; sha256 = "73e5c984d5d3fa17f93cb947fd63671fba66bab94117db84e187cb9260500101"; }
+    { locale = "si"; arch = "linux-i686"; sha256 = "669d825940712d7f10c7303e3e0a0ed9c48e9e5c26b0c035ed58bf8694d5ddc3"; }
+    { locale = "si"; arch = "linux-x86_64"; sha256 = "e60e048af0c965ac6f2adedb58e192d6d4208bf7f57dcef13b899da04ca14420"; }
+    { locale = "zh-CN"; arch = "linux-i686"; sha256 = "f5f5b653e17b495c3cb4b1a26b39d3fdbeedb22c8d733cb2f3b6e57d46269949"; }
+    { locale = "zh-CN"; arch = "linux-x86_64"; sha256 = "653cc18216f5fc156feef73170f903471480612a4de6df4efa3cce79b58fee28"; }
+    { locale = "ro"; arch = "linux-i686"; sha256 = "5cc87c9c84c205f99dc3fa58be8fedd72b9afccb69c91616f11929e2a7e075fd"; }
+    { locale = "ro"; arch = "linux-x86_64"; sha256 = "dc6e8f5dd30a7e2dcfebabfcc508de89cde3754c036811df7168f4f1e53c1477"; }
+    { locale = "ast"; arch = "linux-i686"; sha256 = "653025d1260db10310f8d689cb4554acf7a6388a99bac977b6f59b683d7e5983"; }
+    { locale = "ast"; arch = "linux-x86_64"; sha256 = "1a4623f94b4c68b6b89ec53c512f860388965dc36f2d06272341a194dc85eef6"; }
+    { locale = "pl"; arch = "linux-i686"; sha256 = "0e0ae13028d5f65a54398c634ed5b4a6685e2dc84b05121e71a0c0ca7a04053e"; }
+    { locale = "pl"; arch = "linux-x86_64"; sha256 = "2589909994cfa059d55a75b7d8f756c09f67994034f7f45c7b5b8805302645bf"; }
+    { locale = "gl"; arch = "linux-i686"; sha256 = "155e79bad6226eb2231a08856415b5e4a15cb02235b0b17ff7c0378c38d2dc93"; }
+    { locale = "gl"; arch = "linux-x86_64"; sha256 = "688d3c51645061fda283e2d486de1306f0b457149c82cbd20c7c019e76ed98b2"; }
+    { locale = "ja"; arch = "linux-i686"; sha256 = "90b3bbc31046daada0ce995108fb9542aeb878220579836ed0e5b14088199795"; }
+    { locale = "ja"; arch = "linux-x86_64"; sha256 = "ebd172d4a74ef757ceace8799c752e34fa0fb41dd5f4083d2aad2df4efd0329b"; }
+    { locale = "ca"; arch = "linux-i686"; sha256 = "c1502e310fd4b0a682fef147b4f5a97db972ed49916012a145ce6d5c4afd6452"; }
+    { locale = "ca"; arch = "linux-x86_64"; sha256 = "bac8bfe883d35f3624bae8cd4d831694a8e3f2b319a912ad5007e39483a22e70"; }
+    { locale = "fr"; arch = "linux-i686"; sha256 = "d0315db23af439e736e02d93d2467c86fe2a186c849aef32e928adb5059fa7fd"; }
+    { locale = "fr"; arch = "linux-x86_64"; sha256 = "8d5c5c4ac8865ee233ea10d2c4b153bb47cf4df4047dfae9aa7b5722c293e5cc"; }
+    { locale = "fy-NL"; arch = "linux-i686"; sha256 = "9bbac5b2d4ada74e6cdc8730997d47043d319a79a61636322038584265001fed"; }
+    { locale = "fy-NL"; arch = "linux-x86_64"; sha256 = "ac828318d8ce07332af73b3146f77825e51e8df8e858c0596589dbdfb2c8718f"; }
+    { locale = "sl"; arch = "linux-i686"; sha256 = "16276607ffd4fa9fac4077cfc6da91ced5d5a4b08d804726d9d4b7e870cc25f2"; }
+    { locale = "sl"; arch = "linux-x86_64"; sha256 = "7e1c2f2aaa973b7a19518c62beb43130d7fb95d4c5aecd3370d7ab2fb59f37c5"; }
+    { locale = "be"; arch = "linux-i686"; sha256 = "48b27779e6ee95971d72a6be14e69ac1e724f5450126ad2627a9b2f0511b663c"; }
+    { locale = "be"; arch = "linux-x86_64"; sha256 = "ebd551829f7a66b47a82cad5db79a27126719af71ada250dbaedf292077e9c8e"; }
+    { locale = "ko"; arch = "linux-i686"; sha256 = "8f92e772ce7c54d6210c83fee257c9cc0b2a3542f41ac2059ea377c64d4f59ed"; }
+    { locale = "ko"; arch = "linux-x86_64"; sha256 = "b2cec9901318ec0754e8caca2d56e6e4d08deb4aa21db7fb04c555062b84b9be"; }
+    { locale = "hr"; arch = "linux-i686"; sha256 = "c5a1da56142398fc79b6d356d600f8228b0a4f1ac40d04df4ff5c25564b77a6f"; }
+    { locale = "hr"; arch = "linux-x86_64"; sha256 = "5d0308e1c08960a26ac3328eb5be4c237e2320a38a6db077186f1d1a278feb8d"; }
+    { locale = "nn-NO"; arch = "linux-i686"; sha256 = "d0abb5c4657a4a04999a44f96d00271e8dc3ad79ae0e78cf4b820fc2fd29b266"; }
+    { locale = "nn-NO"; arch = "linux-x86_64"; sha256 = "fdde99be62fe6a911711e1ba69a2babcdba53216a5942494ab7e52cada8bf893"; }
+    { locale = "vi"; arch = "linux-i686"; sha256 = "d0420a7ccd8f4fcd7f56497636baa701c71576d3b88440b609cbb3ebf245d4e4"; }
+    { locale = "vi"; arch = "linux-x86_64"; sha256 = "5657eb2a99f7c2cf32297bbb45fab4c0eb2dd48ba4ba98487beed18aa5e85ada"; }
+    { locale = "es-AR"; arch = "linux-i686"; sha256 = "fe60d3b13e964bd99730e8082b742729084e87f6a285deb8cd2383dccf881f1c"; }
+    { locale = "es-AR"; arch = "linux-x86_64"; sha256 = "76faee1fd8da11731ece128832997de0f10501040921e6abb46fc0ae4922d568"; }
+    { locale = "el"; arch = "linux-i686"; sha256 = "c1ad068c565abb7b3f16c843f6974fcec6f46714c3f9afb193d10ffa3773cbff"; }
+    { locale = "el"; arch = "linux-x86_64"; sha256 = "b5cd4fb82525b67ef199b9eadaebe25f70a29e1dc43b2ad0f0074bf7d01a05f0"; }
+    { locale = "is"; arch = "linux-i686"; sha256 = "195cb61263c4c01c345a5effcb5f4f6741a1ee10f716006a614d55721b013e48"; }
+    { locale = "is"; arch = "linux-x86_64"; sha256 = "42447cb7c7689623a34607a0aa1a9866552756576932d45a4721c5fe8541070f"; }
+    { locale = "ru"; arch = "linux-i686"; sha256 = "6c0f45046e4d1910a20e245f0b69af5b4fb2a9507abd99217bffe68bf213061e"; }
+    { locale = "ru"; arch = "linux-x86_64"; sha256 = "408f3b38fc416cc12640af0928fbea1506eae3f4a65b6b3b889bca54bb0a1521"; }
+    { locale = "pt-BR"; arch = "linux-i686"; sha256 = "330f4546fe50d717fc66b8417405d3c1eef8ca4f312b21563c426739eee4724a"; }
+    { locale = "pt-BR"; arch = "linux-x86_64"; sha256 = "283d3e581ebb84059985aad40f72338a77b068e27b8247e0ac16b915ed16f797"; }
+    { locale = "hy-AM"; arch = "linux-i686"; sha256 = "8068738dbfc0ed5f5a08b1b4a65a5e9e1ac780de43fc5f27c269dcd5e9998f97"; }
+    { locale = "hy-AM"; arch = "linux-x86_64"; sha256 = "a101856b6151cae9d33a909d1a0fc11eb26439ca161db55dc262bf86bb457c29"; }
+    { locale = "sk"; arch = "linux-i686"; sha256 = "5a790cc811d8e392daa83b11feb232092ab97dc8c9fc0bb47b4013751a30f76e"; }
+    { locale = "sk"; arch = "linux-x86_64"; sha256 = "7842ceeab524c98387ca6319735bf7c331d34bcfde395078cc32c443e69962ef"; }
+    { locale = "sr"; arch = "linux-i686"; sha256 = "06ded63a3d09af09ac68b318f79f07e924addb30d4c11903b6a86ba3ef476761"; }
+    { locale = "sr"; arch = "linux-x86_64"; sha256 = "53a99f98398b2044866422ca44b496d489c0b78724f28afb4f919eca656d528a"; }
+    { locale = "en-US"; arch = "linux-i686"; sha256 = "4c4da90f383d7b43e97e471656a6cfbbd44d1b80d57b8b2405497678aced46b5"; }
+    { locale = "en-US"; arch = "linux-x86_64"; sha256 = "41ff22bc9a41aa0e71deebce4894e99f3e3737a57279a1488bf9d2f869cd56ad"; }
+    { locale = "es-ES"; arch = "linux-i686"; sha256 = "e11451297f17febcf0057ae02dc15a298aacc865146e1aac363300dac6de57c5"; }
+    { locale = "es-ES"; arch = "linux-x86_64"; sha256 = "0e5d389a2c5b673b423dd2afad375eb6a7e05c8eb0b07ceb4975d658827d6cf5"; }
+    { locale = "gd"; arch = "linux-i686"; sha256 = "5fc40508e7a6228065084fc91431af3b9231c6ce46ae3e88ef249ad67bf1b545"; }
+    { locale = "gd"; arch = "linux-x86_64"; sha256 = "ef365e27b05f4bd0c8211ed9e54ecfa4983111be74261303870a8d22e6093c08"; }
+    { locale = "fi"; arch = "linux-i686"; sha256 = "9461f7d3953dc6aa5c9d2406331138a5e34d114eb5b48b09b562dade25a38ab7"; }
+    { locale = "fi"; arch = "linux-x86_64"; sha256 = "6a0310cc0e0a5d9e1590c735e91e8c1bb85358687f4a6a59219de05bb0cf9d1d"; }
+    { locale = "de"; arch = "linux-i686"; sha256 = "b4fd29c1bd06c5d6b85aeb6434746f1fa0af627c5795ce2ebc7d3dddcf78e9e6"; }
+    { locale = "de"; arch = "linux-x86_64"; sha256 = "b24afec0b5de5e872848dfcd609f1cf81fe2eed96cc9ee1a5f17fd1b68750d34"; }
+    { locale = "sq"; arch = "linux-i686"; sha256 = "a78274174c8c26426d9f7e85589f6143f47fab9ce8eb9bbb91fc6c9444c1470d"; }
+    { locale = "sq"; arch = "linux-x86_64"; sha256 = "18c6ee5a732d777d9326593a4edfc30f11acdfef2397aa55c436d54a99de9c3a"; }
+    { locale = "sv-SE"; arch = "linux-i686"; sha256 = "3e12328500db45ecfb4572c3cad8b75a46d930ec57a426c8fbe6dd8e033f3cfc"; }
+    { locale = "sv-SE"; arch = "linux-x86_64"; sha256 = "a76f785c8c0b17f3962a94d4cee5bce9be7b91fd2805133f490ad516ba2d5ad8"; }
+    { locale = "hu"; arch = "linux-i686"; sha256 = "72e1d888516119a6aa21d077fbe8faefc5cf13e8e422ae26aeed4416700f16af"; }
+    { locale = "hu"; arch = "linux-x86_64"; sha256 = "962f0b046ab3f385348022d78ffffdae6137b351c5031453f62b5fa1dd44a9b3"; }
+    { locale = "nb-NO"; arch = "linux-i686"; sha256 = "b5b11886e19a03e219bb803c7853bded9c5e4a2cde0a33abba4c0665a44ec8f4"; }
+    { locale = "nb-NO"; arch = "linux-x86_64"; sha256 = "faa18298e02ecd0eca77f4e68e88ebb91ca8ea3abb6241f53d82e1db7db95076"; }
+    { locale = "cs"; arch = "linux-i686"; sha256 = "03b23597d55f1db442f8147bcff7108e3b520e0b5d05d819df07915ba6baa35f"; }
+    { locale = "cs"; arch = "linux-x86_64"; sha256 = "3dea9adb367958babb54dce3102d43d316088aa6140101d18a59cda20522d78f"; }
+    { locale = "br"; arch = "linux-i686"; sha256 = "7b1814286847188ca68b3f24457b3a6ee5cd967833bf789104db0fedd2993941"; }
+    { locale = "br"; arch = "linux-x86_64"; sha256 = "7605776d4a72d82fc65280df0cf9812f134a1dc790e0f60f089f287f38ed5db0"; }
+    { locale = "pt-PT"; arch = "linux-i686"; sha256 = "da8177ab1912d5a0047dd2f6848a421c8fe32d39bacb64e76e0633ddaca5f4de"; }
+    { locale = "pt-PT"; arch = "linux-x86_64"; sha256 = "60b1c2f1f209c5e16c6f29c0a5bcaf46c04bb2ae289925761193387ae65fe18d"; }
+    { locale = "rm"; arch = "linux-i686"; sha256 = "29e073a8068f7d060cf2818d85d465df3f606aba95e867dc9aa67533d09e4b55"; }
+    { locale = "rm"; arch = "linux-x86_64"; sha256 = "8d8ac419650a9cd0b138aa823dcfb67e47f8522a5d51625090c26c45a5c577a7"; }
+    { locale = "lt"; arch = "linux-i686"; sha256 = "9d537ff70f06a5189296a99126a57ab8664266ec2da673671e60e97678d3ed9d"; }
+    { locale = "lt"; arch = "linux-x86_64"; sha256 = "77f30fb2b94fa7cb690c5c0f2fff0ec89c1aa8f8915891d17a66357ddd10d462"; }
+    { locale = "eu"; arch = "linux-i686"; sha256 = "1b613c1cf303a65c3065fc3edf15c6a051c1a7e347512e39cce425ef02828c3c"; }
+    { locale = "eu"; arch = "linux-x86_64"; sha256 = "a02a04bc88efca8523b4af8e4962b205ad13d9eb9879405db57356966b12202b"; }
+    { locale = "it"; arch = "linux-i686"; sha256 = "baede1707cca4ff149956884f855fa0077c372275f6be6f59d32e47cc6509b5b"; }
+    { locale = "it"; arch = "linux-x86_64"; sha256 = "e49f0b02d323e2f83d0da2a5ec2e4585693362545e50bfba51e273d0edf52813"; }
+    { locale = "id"; arch = "linux-i686"; sha256 = "31691ec0b51d19bdab2efe2ab1813bd3363e71ad62bc4f5a860e017516509ad5"; }
+    { locale = "id"; arch = "linux-x86_64"; sha256 = "c6241fb8cd1d83ac5753518c2cc215ee831fa24b816a5a522029d14cea24b15b"; }
+    { locale = "da"; arch = "linux-i686"; sha256 = "aa6c91c15ff9f1769d727883c17720a2732ede4b786c4bff7d42fe25c129246b"; }
+    { locale = "da"; arch = "linux-x86_64"; sha256 = "b940f8ab5b2ad50faedc4520f4a7bd5936debfd70b2fa86b2abf955a22557b20"; }
+    { locale = "ta-LK"; arch = "linux-i686"; sha256 = "cc70eb04cbab5bcd674e40c4d58760c07353726c968f766fc749fcd7154fddd9"; }
+    { locale = "ta-LK"; arch = "linux-x86_64"; sha256 = "948172b68287b1cd8a1d7a32b3e7fd5494390aefea1683cbad34f12ba5d241a7"; }
+    { locale = "uk"; arch = "linux-i686"; sha256 = "6b45d36abc8fe1c731baf855866000ffa08671d025ab97b5301b22079765d70c"; }
+    { locale = "uk"; arch = "linux-x86_64"; sha256 = "9d619639157c645bc34628b7c31ccfb4e8223b891cf8e99118e7b767f7f5e24b"; }
+    { locale = "zh-TW"; arch = "linux-i686"; sha256 = "a9176628228c3f3e07d2929caa872b4a24d9f620de79a148c01f0716c9dd058f"; }
+    { locale = "zh-TW"; arch = "linux-x86_64"; sha256 = "f067e1f516d639b2cc997019a39b568d6377437d2d6810fb87d23a64e72995a0"; }
+    { locale = "ar"; arch = "linux-i686"; sha256 = "7b016747c9e9066a8e4383303ee22e600d3b00716c53755c95067dc8b6267046"; }
+    { locale = "ar"; arch = "linux-x86_64"; sha256 = "f798804c9aa0eb8fd9cde80acf8a2ebc3b4855588ff14092da935cd77bbc660a"; }
+    { locale = "en-GB"; arch = "linux-i686"; sha256 = "7a19e07c52de321f8f182bd14fdaf137b120167d9d2ab4929476f7cf9a94a744"; }
+    { locale = "en-GB"; arch = "linux-x86_64"; sha256 = "b66b2ff31cc778f52ce9e987f38a93f973c04dacbf04559b1872537a083cb98e"; }
+    { locale = "ga-IE"; arch = "linux-i686"; sha256 = "7599ba2b65fcac92464c2ee480c4c823cd0f35661fa30982575e6f87069d3e58"; }
+    { locale = "ga-IE"; arch = "linux-x86_64"; sha256 = "e81f157f75f2eb94f28dc7f2da5c1d0fbb8f8077c28c3afdb2144dd906ce773f"; }
+    { locale = "bn-BD"; arch = "linux-i686"; sha256 = "bdcafd77469b70a8e02cacab63503e4ba085e3b4230e012313f743a130448cb1"; }
+    { locale = "bn-BD"; arch = "linux-x86_64"; sha256 = "2f57c5353e75ec9dd56abf4c4f197af64648e3e2e927b7c868db6f664abb2e14"; }
+    { locale = "pa-IN"; arch = "linux-i686"; sha256 = "f9d8a77df3e4718260e9235ce09008a224e02bde12efe5a88c9341432637f0c4"; }
+    { locale = "pa-IN"; arch = "linux-x86_64"; sha256 = "46a4ae81ecd6fb22aed54a0ca40ddf292adc94b37b38a57e9ab64f5bed8b0a39"; }
+    { locale = "et"; arch = "linux-i686"; sha256 = "f03136ad26eb1d5ead82e26e8620e3cd1b7f30ceb552329d008a33bcb2e930c4"; }
+    { locale = "et"; arch = "linux-x86_64"; sha256 = "d2e446dea1db14210da9e1556614a92954c61ce00b24958ea4c2a61b597c0b13"; }
   ];
 
   arch = if stdenv.system == "i686-linux"
@@ -264,6 +264,7 @@ stdenv.mkDerivation {
       fullName = "unfree";
       url = http://www.mozilla.org/en-US/foundation/trademarks/policy/;
     };
+    maintainers = with stdenv.lib.maintainers; [ fuuzetsu ];
     platforms = platforms.linux;
   };
 }
