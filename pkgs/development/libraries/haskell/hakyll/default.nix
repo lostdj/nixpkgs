@@ -2,31 +2,33 @@
 
 { cabal, binary, blazeHtml, blazeMarkup, cmdargs, cryptohash
 , dataDefault, deepseq, filepath, fsnotify, httpConduit, httpTypes
-, HUnit, lrucache, mtl, network, pandoc, pandocCiteproc, parsec
-, QuickCheck, random, regexBase, regexTdfa, snapCore, snapServer
-, systemFilepath, tagsoup, testFramework, testFrameworkHunit
-, testFrameworkQuickcheck2, text, time, utillinux
+, HUnit, lrucache, mtl, network, networkUri, pandoc, pandocCiteproc
+, parsec, QuickCheck, random, regexBase, regexTdfa, snapCore
+, snapServer, systemFilepath, tagsoup, testFramework
+, testFrameworkHunit, testFrameworkQuickcheck2, text, time
+, utillinux
 }:
 
 cabal.mkDerivation (self: {
   pname = "hakyll";
-  version = "4.5.4.0";
-  sha256 = "16srkm2fxjw1xg7zaikn49zz4xsz9awddnjm6ibv522k3xf3l24c";
+  version = "4.5.5.1";
+  sha256 = "060wcak242p2gja616bdair4sg2k04s8cld5nlk8p3b6an2isld9";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
     binary blazeHtml blazeMarkup cmdargs cryptohash dataDefault deepseq
-    filepath fsnotify httpConduit httpTypes lrucache mtl network pandoc
-    pandocCiteproc parsec random regexBase regexTdfa snapCore
-    snapServer systemFilepath tagsoup text time
+    filepath fsnotify httpConduit httpTypes lrucache mtl network
+    networkUri pandoc pandocCiteproc parsec random regexBase regexTdfa
+    snapCore snapServer systemFilepath tagsoup text time
   ];
   testDepends = [
     binary blazeHtml blazeMarkup cmdargs cryptohash dataDefault deepseq
     filepath fsnotify httpConduit httpTypes HUnit lrucache mtl network
-    pandoc pandocCiteproc parsec QuickCheck random regexBase regexTdfa
-    snapCore snapServer systemFilepath tagsoup testFramework
+    networkUri pandoc pandocCiteproc parsec QuickCheck random regexBase
+    regexTdfa snapCore snapServer systemFilepath tagsoup testFramework
     testFrameworkHunit testFrameworkQuickcheck2 text time utillinux
   ];
+  jailbreak = true;
   meta = {
     homepage = "http://jaspervdj.be/hakyll";
     description = "A static website compiler library";

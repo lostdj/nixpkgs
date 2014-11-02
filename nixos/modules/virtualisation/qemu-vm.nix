@@ -278,7 +278,7 @@ in
     boot.initrd.extraUtilsCommands =
       ''
         # We need mke2fs in the initrd.
-        cp -f ${pkgs.e2fsprogs}/sbin/mke2fs $out/bin
+        cp -vf --remove-destination ${pkgs.e2fsprogs}/sbin/mke2fs $out/bin
       '';
 
     boot.initrd.postDeviceCommands =
@@ -383,7 +383,7 @@ in
 
     # When building a regular system configuration, override whatever
     # video driver the host uses.
-    services.xserver.videoDrivers = mkVMOverride [ "vesa" ];
+    services.xserver.videoDrivers = mkVMOverride [ "modesetting" ];
     services.xserver.defaultDepth = mkVMOverride 0;
     services.xserver.resolutions = mkVMOverride [ { x = 1024; y = 768; } ];
     services.xserver.monitorSection =

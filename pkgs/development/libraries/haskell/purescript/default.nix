@@ -7,8 +7,8 @@
 
 cabal.mkDerivation (self: {
   pname = "purescript";
-  version = "0.5.4.1";
-  sha256 = "1d2i2sspr1dbzjznk70flvnik0b2m226a3z0rkqwrjjbl92bhgwb";
+  version = "0.5.7.1";
+  sha256 = "1xjihv7lq5b2cw44jhxwzr21749gayqfiqjkryz6z9p820hg1zzv";
   isLibrary = true;
   isExecutable = true;
   buildDepends = [
@@ -22,6 +22,5 @@ cabal.mkDerivation (self: {
     description = "PureScript Programming Language Compiler";
     license = self.stdenv.lib.licenses.mit;
     platforms = self.ghc.meta.platforms;
-    hydraPlatforms = self.stdenv.lib.platforms.none;
   };
 })

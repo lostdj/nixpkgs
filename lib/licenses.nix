@@ -25,7 +25,7 @@ rec {
     shortName = "amd";
     fullName = "AMD License Agreement";
     url = http://developer.amd.com/amd-license-agreement/;
-  };#
+  };
 
   apsl20 = spdx {
     shortName = "APSL-2.0";
@@ -72,9 +72,29 @@ rec {
     fullName = "Creative Commons Attribution 3.0";
   };
 
+  cc-by-sa-30 = spdx {
+    shortName = "CC-BY-SA-3.0";
+    fullName = "Creative Commons Attribution Share Alike 3.0";
+  };
+
+  cc-by-40 = spdx {
+    shortName = "CC-BY-4.0";
+    fullName = "Creative Commons Attribution 4.0";
+  };
+
   cddl = spdx {
     shortName = "CDDL-1.0";
     fullName = "Common Development and Distribution License 1.0";
+  };
+
+  cecill20 = spdx {
+    shortName = "CECILL-2.0";
+    fullName = "CeCILL Free Software License Agreement v2.0";
+  };
+
+  cecill-b = spdx {
+    shortName = "CECILL-B";
+    fullName  = "CeCILL-B Free Software License Agreement";
   };
 
   cecill-c = spdx {
@@ -177,6 +197,11 @@ rec {
     fullName = "GNU Lesser General Public License v3.0 or later";
   };
 
+  libpng = spdx {
+    shortName = "Libpng";
+    fullName = "libpng License";
+  };
+
   libtiff = {
     shortName = "libtiff";
     fullName = "libtiff license";
@@ -194,6 +219,8 @@ rec {
     fullName = "Lucent Public License v1.02";
   };
 
+  # spdx.org does not (yet) differentiate between the X11 and Expat versions
+  # for details see http://en.wikipedia.org/wiki/MIT_License#Various_versions
   mit = spdx {
     shortName = "MIT";
     fullName = "MIT License";
@@ -230,6 +257,11 @@ rec {
     fullName = "OpenSSL License";
   };
 
+  postgresql = spdx {
+    shortName = "PostgreSQL";
+    fullName = "PostgreSQL License";
+  };
+
   psfl = spdx {
     shortName = "Python-2.0";
     fullName = "Python Software Foundation License version 2";
@@ -258,6 +290,12 @@ rec {
 
   unfreeRedistributableFirmware = "unfree-redistributable-firmware";
 
+  unlicense = {
+    shortName = "Unlicense";
+    fullName = "Unlicense";
+    url = http://unlicense.org/;
+  };
+
   wadalab = {
     shortName = "wadalab";
     fullName = "Wadalab Font License";
@@ -280,4 +318,3 @@ rec {
   };
 
 }
-

@@ -1,14 +1,16 @@
-{ stdenv, fetchurl, coreutils, pam, groff }:
+{ stdenv, fetchurl, coreutils, pam, groff
+, sendmailPath ? "/var/setuid-wrappers/sendmail"
+}:
 
 stdenv.mkDerivation rec {
-  name = "sudo-1.8.10p3";
+  name = "sudo-1.8.11";
 
   src = fetchurl {
     urls =
       [ "ftp://ftp.sudo.ws/pub/sudo/${name}.tar.gz"
         "ftp://ftp.sudo.ws/pub/sudo/OLD/${name}.tar.gz"
       ];
-    sha256 = "002l6h27pnhb77b65frhazbhknsxvrsnkpi43j7i0qw1lrgi7nkf";
+    sha256 = "0if82pvmz7m3qkj3sc9yy8mpcd7lmbn0mhrgnd1zpszvnpkps5x3";
   };
 
   configureFlags = [
@@ -17,6 +19,11 @@ stdenv.mkDerivation rec {
     "--with-rundir=/var/run"
     "--with-vardir=/var/db/sudo"
     "--with-logpath=/var/log/sudo.log"
+    "--with-sendmail=${sendmailPath}"
+  ];
+
+  configureFlagsArray = [
+    "--with-passprompt=[sudo] password for %p: "  # intentional trailing space
   ];
 
   postConfigure =

@@ -1,5 +1,5 @@
 { pkgs
-, kernel ? pkgs.linux_3_10
+, kernel ? pkgs.linux
 , img ? "bzImage"
 , rootModules ?
     [ "virtio_pci" "virtio_blk" "virtio_balloon" "ext4" "unix" "9p" "9pnet_virtio" "rtc_cmos" ]
@@ -1586,7 +1586,7 @@ rec {
       fullName = "Debian 7.6 Wheezy (i386)";
       packagesList = fetchurl {
         url = mirror://debian/dists/wheezy/main/binary-i386/Packages.bz2;
-        sha256 = "773ba601513cd7ef1d5192ad8baa795fa050573d82568c577cdf79adade698a3";
+        sha256 = "1j093d6dwixyrk87sdvaayh3ffcn5aqwik36blndiw5njw2qkzgj";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;
@@ -1597,7 +1597,7 @@ rec {
       fullName = "Debian 7.6 Wheezy (amd64)";
       packagesList = fetchurl {
         url = mirror://debian/dists/wheezy/main/binary-amd64/Packages.bz2;
-        sha256 = "11a8bd3648d51f51e56c9f5382168cc47267d67ef6a050826e1cd358ed46cc17";
+        sha256 = "1n46fxq8a2dm1i7ysc80s5lg10z5dh0hyd8k3h532n5wzs44xqcc";
       };
       urlPrefix = mirror://debian;
       packages = commonDebianPackages;

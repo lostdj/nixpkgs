@@ -3,7 +3,8 @@
 , bluez, sbc, udev, libcap, json_c
 , jackaudioSupport ? false, jack2 ? null
 , x11Support ? false, xlibs
-, useSystemd ? false, systemd ? null }:
+, useSystemd ? false, systemd ? null
+, ossWrapper ? false }:
 
 assert jackaudioSupport -> jack2 != null;
 
@@ -45,9 +46,16 @@ stdenv.mkDerivation rec {
        -e "s|chmod r+s |true |"
   '';
 
-  configureFlags =
-    [ "--disable-solaris" "--disable-jack" "--disable-oss-output"
-      "--disable-oss-wrapper" "--localstatedir=/var" "--sysconfdir=/etc" ]
+  configureFlags = [
+    "--disable-solaris"
+    "--disable-jack"
+    "--disable-oss-output"
+  ] ++ stdenv.lib.optional (!ossWrapper) "--disable-oss-wrapper" ++
+  [
+    "--localstatedir=/var"
+    "--sysconfdir=/etc"
+    "--with-access-group=audio"
+  ]
     ++ stdenv.lib.optional jackaudioSupport "--enable-jack"
     ++ stdenv.lib.optional stdenv.isDarwin "--with-mac-sysroot=/";
 

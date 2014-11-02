@@ -7,12 +7,12 @@ assert stdenv.isLinux;
 assert stdenv.gcc.gcc != null;
 
 let
-    version = "1.7.23";
+    version = "1.7.29";
     name = "wine-${version}";
 
     src = fetchurl {
       url = "mirror://sourceforge/wine/${name}.tar.bz2";
-      sha256 = "012ww1yifayakw9n2m23sx83dc3i2xiq3bn5n9iprppdhwxpp76v";
+      sha256 = "0qnyp1svzh2yyc3p34dg8hf21lwzxn4xkgpa3s0rfcak6l6ijj5f";
     };
 
     gecko = fetchurl {
@@ -49,7 +49,7 @@ in stdenv.mkDerivation rec {
     freetype fontconfig stdenv.gcc.gcc mesa mesa_noglu.osmesa libdrm
     xlibs.libXinerama xlibs.libXrender xlibs.libXrandr
     xlibs.libXcursor xlibs.libXcomposite libpng libjpeg
-    openssl gnutls cups
+    openssl gnutls cups ncurses
   ];
 
   # Don't shrink the ELF RPATHs in order to keep the extra RPATH
