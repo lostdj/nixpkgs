@@ -4466,6 +4466,8 @@ let
 
   gradle = callPackage ../development/tools/build-managers/gradle { };
 
+  gradle18 = callPackage ../development/tools/build-managers/gradle/1.8.nix { };
+
   gperf = callPackage ../development/tools/misc/gperf { };
 
   gtk_doc = callPackage ../development/tools/documentation/gtk-doc { };
