@@ -12,6 +12,9 @@ kde {
 
   propagatedBuildInputs = [ kdelibs nepomuk_core boost ];
 
+  # Prevent a dependency on boost.dev. FIXME: move this cmake file to .dev.
+  postInstall = "rm $out/lib/gpgmepp/GpgmeppConfig.cmake";
+
   meta = {
     description = "KDE PIM libraries";
     license = "LGPL";

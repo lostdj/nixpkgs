@@ -5,7 +5,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "http://services.gradle.org/distributions/${name}-bin.zip";
-    sha256 = "067lbzcj2ndiapkyjzj0g6jx7s29nw2862y126v2g4r9703sa2j2";
+    sha256 = "420aa50738299327b611c10b8304b749e8d3a579407ee9e755b15921d95ff418";
   };
 
   installPhase = ''
