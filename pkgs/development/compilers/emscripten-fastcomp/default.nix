@@ -1,7 +1,7 @@
 { stdenv, fetchgit, python }:
 
 let
-  tag = "1.25.1";
+  tag = "1.29.10";
 in
 
 stdenv.mkDerivation rec {
@@ -10,13 +10,13 @@ stdenv.mkDerivation rec {
   srcFC = fetchgit {
     url = git://github.com/kripken/emscripten-fastcomp;
     rev = "refs/tags/${tag}";
-    sha256 = "3562617087ac09643dcc5a4527fd906eeb71f165fe33ea94c1a73f22e20c3e8c";
+    sha256 = "eee0f884c7e10e1b869b9d3afbb03bf69c63ec0560b136e3e8cd64ca00a41653";
   };
 
   srcFL = fetchgit {
     url = git://github.com/kripken/emscripten-fastcomp-clang;
     rev = "refs/tags/${tag}";
-    sha256 = "4291cce2205b19aec9a78895822af690e325408232547aded1774216f68cf541";
+    sha256 = "22c48e85dfacd9f2349d37fb421f0f848b65fc7b39e66984d04349ee3271667c";
   };
 
   buildInputs = [ python ];

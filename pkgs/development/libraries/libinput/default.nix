@@ -1,11 +1,11 @@
 { stdenv, fetchurl, pkgconfig, mtdev, udev, libevdev }:
 
 stdenv.mkDerivation rec {
-  name = "libinput-0.6.0";
+  name = "libinput-0.10.0";
 
   src = fetchurl {
     url = "http://www.freedesktop.org/software/libinput/${name}.tar.xz";
-    sha256 = "1g5za42f60vw87982vjh0n6r78qajj34l323p7623fbw3rvmbd9h";
+    sha256 = "0h8lbhhxb5020bhdblxp1pkapy4bchjj3l44fxabz9pi1zw03q2c";
   };
 
   buildInputs = [ pkgconfig mtdev udev libevdev ];

@@ -32,6 +32,11 @@ in
 
 rec {
 
+  bridge_stp_helper =
+    { name = "bridge-stp-helper";
+      patch = ./bridge-stp-helper.patch;
+    };
+
   no_xsave =
     { name = "no-xsave";
       patch = ./no-xsave.patch;
@@ -60,21 +65,26 @@ rec {
   };
 
   grsecurity_stable = grsecPatch
-    { kversion  = "3.14.26";
-      revision  = "201412071005";
+    { kversion  = "3.14.33";
+      revision  = "201502200812";
       branch    = "stable";
-      sha256    = "1dy98l1kqc20735385pahwksjqmsk4j5vd6d39l61y6rwc9iqfan";
+      sha256    = "1dydrphgz8sfjf7w8b0kqai9k1dld6jv6frhqs6gqjj06wbg1rwd";
     };
 
   grsecurity_unstable = grsecPatch
-    { kversion  = "3.17.6";
-      revision  = "201412071639";
+    { kversion  = "3.18.7";
+      revision  = "201502200813";
       branch    = "test";
-      sha256    = "182pr7whmr62bbbpn9dwcmmvvx68dbrkv33cb1dz7d29an7mx67w";
+      sha256    = "1svvy0sip6p3h8iqlw0rh3lnxqziwz9fw8znyq1rw5cia89dx4c8";
     };
 
   grsec_fix_path =
     { name = "grsec-fix-path";
       patch = ./grsec-path.patch;
+    };
+
+  crc_regression =
+    { name = "crc-backport-regression";
+      patch = ./crc-regression.patch;
     };
 }
