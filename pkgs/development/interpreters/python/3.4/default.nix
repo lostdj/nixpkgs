@@ -20,6 +20,7 @@ with stdenv.lib;
 
 let
   majorVersion = "3.4";
+  pythonVersion = majorVersion;
   version = "${majorVersion}.2";
   fullVersion = "${version}";
 
@@ -29,6 +30,7 @@ let
 in
 stdenv.mkDerivation {
   name = "python3-${fullVersion}";
+  pythonVersion = majorVersion;
   inherit majorVersion version;
 
   src = fetchurl {
@@ -42,7 +44,10 @@ stdenv.mkDerivation {
     for i in /usr /sw /opt /pkg; do	# improve purity
       substituteInPlace ./setup.py --replace $i /no-such-path
     done
-    ${optionalString stdenv.isDarwin ''export NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -msse2"''}
+    ${optionalString stdenv.isDarwin ''
+       export NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -msse2"
+       export MACOSX_DEPLOYMENT_TARGET=10.6
+     ''}
 
     configureFlagsArray=( --enable-shared --with-threads
                           CPPFLAGS="${concatStringsSep " " (map (p: "-I${p}/include") buildInputs)}"
