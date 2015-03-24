@@ -1,5 +1,5 @@
 { stdenv, fetchurl, makeDesktopItem, makeWrapper, patchelf, p7zip, jdk
-, coreutils, gnugrep, which, git, python, unzip
+, coreutils, gnugrep, which, git, python, unzip, androidsdk
 }:
 
 assert stdenv.isLinux;
@@ -54,25 +54,26 @@ let
     '';
 
     installPhase = ''
-      mkdir -vp $out/{bin,$name,share/pixmaps,libexec/${name}}
-      cp -va . $out/$name
+      mkdir -p $out/{bin,$name,share/pixmaps,libexec/${name}}
+      cp -a . $out/$name
       ln -s $out/$name/bin/${loName}.png $out/share/pixmaps/${execName}.png
       mv bin/fsnotifier* $out/libexec/${name}/.
 
       jdk=${jdk.home}
+      item=${desktopItem}
 
       makeWrapper "$out/$name/bin/${loName}.sh" "$out/bin/${execName}" \
         --prefix PATH : "$out/libexec/${name},${jdk}/bin:${coreutils}/bin:${gnugrep}/bin:${which}/bin:${git}/bin" \
         --prefix JDK_HOME : "$jdk" \
         --prefix ${hiName}_JDK : "$jdk"
 
-      cp -a "${desktopItem}"/* "$out"
+      ln -s "$item/share/applications" $out/share
     '';
 
   };
 
   buildAndroidStudio = { name, version, build, src, license, description }:
-    (mkIdeaProduct rec {
+    let drv = (mkIdeaProduct rec {
       inherit name version build src;
       product = "Studio";
       meta = with stdenv.lib; {
@@ -87,6 +88,13 @@ let
         platforms = platforms.linux;
         maintainers = with maintainers; [ edwtjo ];
       };
+    });
+    in stdenv.lib.overrideDerivation drv (x : {
+      buildInputs = x.buildInputs ++ [ makeWrapper ];
+      installPhase = x.installPhase +  ''
+        wrapProgram "$out/bin/android-studio" \
+          --set ANDROID_HOME "${androidsdk}/libexec/android-sdk-linux/"
+      '';
     });
 
   buildClion = { name, version, build, src, license, description }:
@@ -185,14 +193,14 @@ in
 
   android-studio = buildAndroidStudio rec {
     name = "android-studio-${version}";
-    version = "1.1.0b2";
-    build = "135.1711524";
+    version = "1.1.0";
+    build = "135.1740770";
     description = "Android development environment based on IntelliJ IDEA";
     license = stdenv.lib.licenses.asl20;
     src = fetchurl {
       url = "https://dl.google.com/dl/android/studio/ide-zips/${version}" +
             "/android-studio-ide-${build}-linux.zip";
-      sha256 = "0pkmyk7ipd4bfbryhanak5mq3x8ix1yv4czx8yi9vdpa34b6pnkw";
+      sha256 = "1r2hrld3yfaxq3mw2xmzhvrrhc7w5xlv3d18rv758hy9n40c2nr1";
     };
   };
 
@@ -210,25 +218,25 @@ in
 
   idea-community = buildIdea rec {
     name = "idea-community-${version}";
-    version = "14.0.3";
-    build = "IC-139.1117";
+    version = "14.1";
+    build = "IC-141.177.4";
     description = "Integrated Development Environment (IDE) by Jetbrains, community edition";
     license = stdenv.lib.licenses.asl20;
     src = fetchurl {
       url = "https://download.jetbrains.com/idea/ideaIC-${version}.tar.gz";
-      sha256 = "01wcpzdahkh3li2l3k2bgirnlp7hdxk9y1kyrxc3d9d1nazq8wqn";
+      sha256 = "05irkxhmx6pisvghjalw8hcf9v3n4wn0n0zc92ahivzxlicylpr6";
     };
   };
 
   idea-ultimate = buildIdea rec {
     name = "idea-ultimate-${version}";
-    version = "14.0.3";
-    build = "IU-139.1117";
+    version = "14.1";
+    build = "IU-141.177.4";
     description = "Integrated Development Environment (IDE) by Jetbrains, requires paid license";
     license = stdenv.lib.licenses.unfree;
     src = fetchurl {
       url = "https://download.jetbrains.com/idea/ideaIU-${version}.tar.gz";
-      sha256 = "1zkqigdh9l1f3mjjvxsp7b7vc93v5ylvxa1dfpclzmfbzna7h69s";
+      sha256 = "10zv3m44ci7gl7163yp4wxnjy7c0g5zl34c2ibnx4c6ds6l4di2p";
     };
   };
 
