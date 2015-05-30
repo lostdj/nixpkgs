@@ -56,16 +56,17 @@ let
 
 in
 
+with stdenv.lib;
 stdenv.mkDerivation rec {
   name = "mpv-${version}";
-  version = "0.7.3";
+  version = "0.9.1";
 
   src = fetchurl {
     url = "https://github.com/mpv-player/mpv/archive/v${version}.tar.gz";
-    sha256 = "1cg82zwzi6qh8s8w3716ikm1l1sigl9h6pd9ffdrp3ja4r2drp48";
+    sha256 = "17hpx8wb4b6hjhc208jn71p02s0gd6665vzyyy249k6jfn2nh8sx";
   };
 
-  buildInputs = with stdenv.lib;
+  buildInputs = 
     [ python3 lua perl freetype pkgconfig ffmpeg libass docutils which libpthreadstubs lua5_sockets ]
     ++ optionals x11Support [ libX11 libXext mesa libXxf86vm ]
     ++ optional alsaSupport alsaLib

@@ -78,6 +78,7 @@ stdenv.mkDerivation rec {
       (substituteAll { src = ./0010-dlopen-libXcursor.patch; inherit libXcursor; })
       (substituteAll { src = ./0011-dlopen-openssl.patch; inherit openssl; })
       (substituteAll { src = ./0012-dlopen-dbus.patch; dbus_libs = dbus; })
+      ./0013-qtwebkit-glib-2.44.patch
     ];
 
   preConfigure = ''
@@ -153,7 +154,7 @@ stdenv.mkDerivation rec {
   # doesn't remain a runtime-dep if not used
   ++ optionals mesaSupported [ mesa mesa_glu ]
   ++ optional (cups != null) cups
-  ++ optional (mysql != null) mysql
+  ++ optional (mysql != null) mysql.lib
   ++ optional (postgresql != null) postgresql;
 
   buildInputs = [ gdb bison flex gperf ruby ];

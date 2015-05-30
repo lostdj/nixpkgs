@@ -3,11 +3,11 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "tevent-0.9.22";
+  name = "tevent-0.9.24";
 
   src = fetchurl {
     url = "mirror://samba/tevent/${name}.tar.gz";
-    sha256 = "0myyi3lwsi6f3f0a5qw8rjpm2d5yf18pw4vljdwyi885l411sksl";
+    sha256 = "0l1zjx2z6nhvn6gwbcvzn8w0cca53j717fwi10s7a5v1jb04rfad";
   };
 
   buildInputs = [
@@ -24,7 +24,7 @@ stdenv.mkDerivation rec {
   ];
 
   meta = with stdenv.lib; {
-    description = "an event system based on the talloc memory management library.";
+    description = "An event system based on the talloc memory management library";
     homepage = http://tevent.samba.org/;
     license = licenses.lgpl3Plus;
     maintainers = with maintainers; [ wkennington ];

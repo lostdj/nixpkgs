@@ -13,15 +13,16 @@
 
 with stdenv.lib;
 
-assert (withQt5 -> qt5 != null); assert (!withQt5 -> qt4 != null);
+assert (withQt5 -> qt5 != null);
+assert (!withQt5 -> qt4 != null);
 
 stdenv.mkDerivation rec {
   name = "vlc-${version}";
-  version = "2.1.5";
+  version = "2.2.1";
 
   src = fetchurl {
     url = "http://download.videolan.org/vlc/${version}/${name}.tar.xz";
-    sha256 = "0whzbn7ahn5maarcwl1yhk9lq10b0q0y9w5pjl9kh3frdjmncrbg";
+    sha256 = "1jqzrzrpw6932lbkf863xk8cfmn4z2ngbxz7w8ggmh4f6xz9sgal";
   };
 
   buildInputs =
@@ -42,6 +43,7 @@ stdenv.mkDerivation rec {
       "--enable-dc1394"
       "--enable-ncurses"
       "--enable-vdpau"
+      "--enable-dvdnav"
     ]
     ++ optional onlyLibVLC  "--disable-vlc";
 
