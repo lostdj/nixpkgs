@@ -4,6 +4,9 @@ with import ./lib.nix { inherit pkgs; };
 
 self: super: {
 
+  # Suitable LLVM version.
+  llvmPackages = pkgs.llvmPackages_34;
+
   # Disable GHC 7.0.x core libraries.
   array = null;
   base = null;
@@ -32,18 +35,21 @@ self: super: {
   unix = null;
 
   # binary is not a core library for this compiler.
-  binary = self.binary_0_7_3_0;
+  binary = self.binary_0_7_4_0;
 
   # deepseq is not a core library for this compiler.
-  deepseq = self.deepseq_1_4_0_0;
+  deepseq = self.deepseq_1_4_1_1;
 
   # transformers is not a core library for this compiler.
-  transformers = self.transformers_0_4_2_0;
-  mtl = self.mtl_2_2_1;
-  transformers-compat = disableCabalFlag super.transformers-compat "three";
+  transformers = self.transformers_0_4_3_0;
 
   # https://github.com/tibbe/hashable/issues/85
   hashable = dontCheck super.hashable;
+
+  # Newer versions don't compile.
+  Cabal_1_18_1_6 = dontJailbreak super.Cabal_1_18_1_6;
+  cabal-install_1_18_1_0 = super.cabal-install_1_18_1_0.override { Cabal = self.Cabal_1_18_1_6; };
+  cabal-install = self.cabal-install_1_18_1_0;
 
   # Needs Cabal >= 1.18.x.
   jailbreak-cabal = super.jailbreak-cabal.override { Cabal = self.Cabal_1_18_1_6; };
@@ -59,5 +65,8 @@ self: super: {
 
   # Setup: Can't find transitive deps for haddock
   doctest = dontHaddock super.doctest;
+
+  # Needs hashable on pre 7.10.x compilers.
+  nats = addBuildDepend super.nats self.hashable;
 
 }

@@ -17,8 +17,6 @@ stdenv.mkDerivation rec {
     sha256 = "14ipkwmzv0b02sclhgp2xj0cvhl3gk40sc2l21s87621kk640dzv";
   };
 
-  patches = [ ./darwin-new-sections.patch ];
-
   buildInputs = [ ncurses pkgconfig texinfo libxml2 gnutls ];
 
   postUnpack = ''

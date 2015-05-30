@@ -20,8 +20,8 @@ stdenv.mkDerivation rec {
   configureFlags = "--with-extra-includes=${libjpeg}/include";
 
   buildInputs =
-    [ pkgconfig autoreconfHook commoncpp2 openssl boost boost.lib libsndfile
-      libxml2 libjpeg readline qt3 perl file
+    [ pkgconfig autoreconfHook commoncpp2 openssl boost libsndfile
+      libxml2 libjpeg readline qt3 perl file ccrtp
       # optional ? :
       alsaLib speex
       libzrtpcpp xorg.libX11 xorg.libXaw xorg.libICE xorg.libXext

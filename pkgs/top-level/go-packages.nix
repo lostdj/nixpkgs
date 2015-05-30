@@ -1,7 +1,7 @@
 /* This file defines the composition for Go packages. */
 
 { overrides, stdenv, go, buildGoPackage, git, pkgconfig, libusb
-, fetchgit, fetchhg, fetchurl, fetchFromGitHub, fetchbzr }:
+, fetchgit, fetchhg, fetchurl, fetchFromGitHub, fetchbzr, pkgs }:
 
 let self = _self // overrides; _self = with self; {
 
@@ -10,13 +10,28 @@ let self = _self // overrides; _self = with self; {
   ## OFFICIAL GO PACKAGES
 
   crypto = buildGoPackage rec {
-    rev = "31393df5baea";
+    rev = "4d48e5fa3d62b5e6e71260571bf76c767198ca02";
     name = "go-crypto-${rev}";
-    goPackagePath = "code.google.com/p/go.crypto";
-    src = fetchhg {
+    goPackagePath = "golang.org/x/crypto";
+    goPackageAliases = [ "code.google.com/p/go.crypto" ];
+
+    src = fetchFromGitHub {
       inherit rev;
-      url = "https://${goPackagePath}";
-      sha256 = "0b95dpsvxxapcjjvhj05fdmyn0mzffamc25hvxy7xgsl2l9yy3nw";
+      owner  = "golang";
+      repo   = "crypto";
+      sha256 = "0plvjv56afb02p7l3c2zfwffnhscmc3f0ckj1gls9ay6vj85y7l8";
+    };
+  };
+
+  glog = buildGoPackage rec {
+    rev = "44145f04b68cf362d9c4df2182967c2275eaefed";
+    name = "glog-${rev}";
+    goPackagePath = "github.com/golang/glog";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "golang";
+      repo = "glog";
+      sha256 = "1k7sf6qmpgm0iw81gx2dwggf9di6lgw0n54mni7862hihwfrb5rq";
     };
   };
 
@@ -32,40 +47,70 @@ let self = _self // overrides; _self = with self; {
   };
 
   net = buildGoPackage rec {
-    rev = "3338d5f109e9";
-    name = "go.net-${rev}";
-    goPackagePath = "code.google.com/p/go.net";
-    src = fetchhg {
+    rev = "e0403b4e005737430c05a57aac078479844f919c";
+    name = "net-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "golang.org/x/net";
+    goPackageAliases = [ "code.google.com/p/go.net" ];
+
+    src = fetchFromGitHub {
       inherit rev;
-      url = "https://${goPackagePath}";
-      sha256 = "0yz807y3ac07x3nf0qlaw1w1i6asynrpyssjl8jyv3pplww0qj7i";
+      owner = "golang";
+      repo = "net";
+      sha256 = "1g7cjzw4g4301a3yqpbk8n1d4s97sfby2aysl275x04g0zh8jxqp";
     };
+
     propagatedBuildInputs = [ text ];
   };
 
-  protobuf = buildGoPackage rec {
-    rev = "36be16571e14";
-    name = "goprotobuf-${rev}";
-    goPackagePath = "code.google.com/p/goprotobuf";
-    src = fetchhg {
+  oauth2 = buildGoPackage rec {
+    rev = "f98d0160877ab4712b906626425ed8b0b320907c";
+    name = "oauth2-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "golang.org/x/oauth2";
+
+    src = fetchFromGitHub {
       inherit rev;
-      url = "https://code.google.com/p/goprotobuf";
-      sha256 = "14yay2sgfbbs0bx3q03bdqn1kivyvxfdm34rmp2612gvinlll215";
+      owner = "golang";
+      repo = "oauth2";
+      sha256 = "0hi54mm63ha7a75avydj6xm0a4dd2njdzllr9y2si1i1wnijqw2i";
     };
+
+    extraSrcs = [
+      { inherit (gcloud-golang) src goPackagePath; }
+    ];
+
+    buildInputs = [ net ];
+  };
+
+
+  protobuf = buildGoPackage rec {
+    rev = "efd7476481382c195beb33acd8ec2f1527167fb4";
+    name = "goprotobuf-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/golang/protobuf";
+    goPackageAliases = [ "code.google.com/p/goprotobuf" ];
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "golang";
+      repo = "protobuf";
+      sha256 = "1wc3m4jpsdmmqdcf2isc9913mmwfyv791c0rd26kpjjwynh5dhdm";
+    };
+
     subPackages = [ "proto" "protoc-gen-go" ];
   };
 
   text = buildGoPackage rec {
-    rev = "024681b033be";
-    name = "go.text-${rev}";
-    goPackagePath = "code.google.com/p/go.text";
-    src = fetchhg {
+    rev = "c93e7c9fff19fb9139b5ab04ce041833add0134e";
+    name = "text-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "golang.org/x/text";
+
+    src = fetchFromGitHub {
       inherit rev;
-      url = "https://${goPackagePath}";
-      sha256 = "19px5pw5mvwjb7ymivfkkkr6cyl2npv834jxlr6y0x5ca1djhsci";
+      owner = "golang";
+      repo = "text";
+      sha256 = "1yvmllriqjm0k97vnxycz9q0likvh18a68xbyg1k6ddkvn9sy03y";
     };
-    doCheck = false;
   };
+
 
   tools = buildGoPackage rec {
     rev = "140fcaadc5860b1a014ec69fdeec807fe3b787e8";
@@ -80,6 +125,46 @@ let self = _self // overrides; _self = with self; {
   };
 
   ## THIRD PARTY
+
+  ansicolor = buildGoPackage rec {
+    rev = "8368d3b31cf6f2c2464c7a91675342c9a0ac6658";
+    name = "ansicolor-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/shiena/ansicolor";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "shiena";
+      repo   = "ansicolor";
+      sha256 = "1fyn06vxm44s0ph8pr7r9gkab1f4x851zlyy3p6jbbwsa6an8g9w";
+    };
+  };
+
+  asn1-ber = buildGoPackage rec {
+    rev = "ec51d5ed21377b4023ca7b1e70ae4cb296ee6047";
+    name = "asn1-ber-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/nmcclain/asn1-ber";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "nmcclain";
+      repo   = "asn1-ber";
+      sha256 = "0a2d38k7zpcnf148zlxq2rm7s1s1hzybb3w5ygxilipz0m7qkdsb";
+    };
+  };
+
+  aws-sdk-go = buildGoPackage rec {
+    rev = "5e038f730cbb99b144eeb1dbf92cd06c2d00b503";
+    name = "aws-sdk-go-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/awslabs/aws-sdk-go";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "awslabs";
+      repo   = "aws-sdk-go";
+      sha256 = "1725y3aic53l8ms0583gdn0s915y1b783hs339qll0mmx7v09in5";
+    };
+
+    buildInputs = [ go-ini gucumber testify ];
+  };
 
   binarydist = buildGoPackage rec {
     rev = "9955b0ab8708602d411341e55fffd7e0700f86bd";
@@ -166,15 +251,45 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  confd = buildGoPackage rec {
+    rev = "v0.9.0";
+    name = "confd-${rev}";
+    goPackagePath = "github.com/kelseyhightower/confd";
+    preBuild = "export GOPATH=$GOPATH:$NIX_BUILD_TOP/go/src/${goPackagePath}/Godeps/_workspace";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "kelseyhightower";
+      repo = "confd";
+      sha256 = "0rz533575hdcln8ciqaz79wbnga3czj243g7fz8869db6sa7jwlr";
+    };
+    subPackages = [ "./" ];
+  };
+
+  dbus = buildGoPackage rec {
+    rev = "88765d85c0fdadcd98a54e30694fa4e4f5b51133";
+    name = "dbus-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/godbus/dbus";
+    preBuild = ''
+      cd "go/src/$goPackagePath"
+      rm -r _examples
+    '';
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "godbus";
+      repo = "dbus";
+      sha256 = "0k80wzdx8091y3012nd4giwgc08n1pj6lcr9i44dsapcjnb80jkn";
+    };
+  };
+
   dns = buildGoPackage rec {
-    rev = "0bd3fb7026404936cf18204ea527d27f067923cf";
+    rev = "fd694e564b3ceaf34a8bbe9ef18f65c64df8ed03";
     name = "dns-${stdenv.lib.strings.substring 0 7 rev}";
     goPackagePath = "github.com/miekg/dns";
     src = fetchFromGitHub {
       inherit rev;
       owner = "miekg";
       repo = "dns";
-      sha256 = "1hv2ikpd9gr9idf7zh8nyqgdbnnffs057wsdpd7m44mllbmzhdxn";
+      sha256 = "1g15l00jypjac0fd2j39lifw1j3md49vk6fq35mv8kc8ighhvxaq";
     };
   };
 
@@ -186,6 +301,86 @@ let self = _self // overrides; _self = with self; {
       inherit rev;
       url = "git://${goPackagePath}.git";
       sha256 = "83e3010509805d1d315c7aa85a356fda69d91b51ff99ed98a503d63adb3613e9";
+    };
+  };
+
+  fsnotify = buildGoPackage rec {
+    rev = "4894fe7efedeeef21891033e1cce3b23b9af7ad2";
+    name = "fsnotify-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/howeyc/fsnotify";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "howeyc";
+      repo = "fsnotify";
+      sha256 = "09r3h200nbw8a4d3rn9wxxmgma2a8i6ssaplf3zbdc2ykizsq7mn";
+    };
+  };
+
+  g2s = buildGoPackage rec {
+    rev = "ec76db4c1ac16400ac0e17ca9c4840e1d23da5dc";
+    name = "g2s-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/peterbourgon/g2s";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "peterbourgon";
+      repo   = "g2s";
+      sha256 = "1p4p8755v2nrn54rik7yifpg9szyg44y5rpp0kryx4ycl72307rj";
+    };
+  };
+
+  gcloud-golang = buildGoPackage rec {
+    rev = "de1c38e5af44da22abe7c3b14a1edcf6264dae55";
+    name = "gcloud-golang-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "google.golang.org/cloud";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "GoogleCloudPlatform";
+      repo = "gcloud-golang";
+      sha256 = "0n6sh1zblixwyc9ykbsknmadsx2dmn3b5rsyrs30id1f96pgh4l0";
+    };
+
+    buildInputs = [ net oauth2 protobuf google-api-go-client grpc ];
+  };
+
+  ginkgo = buildGoPackage rec {
+    rev = "5ed93e443a4b7dfe9f5e95ca87e6082e503021d2";
+    name = "ginkgo-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/onsi/ginkgo";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "onsi";
+      repo = "ginkgo";
+      sha256 = "0ghrx5qmgvgb8cbvsj53v1ir4j9agilg4wyhpk5ikqdv6mmqly4h";
+    };
+    subPackages = [ "./" ];  # don't try to build test fixtures
+  };
+
+  goamz = buildGoPackage rec {
+    rev = "2a8fed5e89ab9e16210fc337d1aac780e8c7bbb7";
+    name = "goamz-${rev}";
+    goPackagePath = "github.com/goamz/goamz";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "goamz";
+      repo   = "goamz";
+      sha256 = "0rlinp0cvgw66qjndg4padr5s0wd3n7kjfggkx6czqj9bqaxcz4b";
+    };
+    propagatedBuildInputs = [ go-ini ];
+
+    # These might need propagating too, but I haven't tested the entire library
+    buildInputs = [ sets go-simplejson check-v1 ];
+  };
+
+  goautoneg = buildGoPackage rec {
+    rev = "75cd24fc2f2c2a2088577d12123ddee5f54e0675";
+    name = "goautoneg-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "bitbucket.org/ww/goautoneg";
+
+    src = fetchhg {
+      inherit rev;
+      url = "https://${goPackagePath}";
+      sha256 = "19khhn5xhqv1yp7d6k987gh5w5rhrjnp4p0c6fyrd8z6lzz5h9qi";
     };
   };
 
@@ -211,6 +406,103 @@ let self = _self // overrides; _self = with self; {
     };
     buildInputs = [ oglematchers ];
     doCheck = false; # please check again
+  };
+
+  govers = buildGoPackage rec {
+    rev = "3b5f175f65d601d06f48d78fcbdb0add633565b9";
+    name = "govers-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/rogpeppe/govers";
+    dontRenameImports = true;
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "rogpeppe";
+      repo = "govers";
+      sha256 = "0din5a7nff6hpc4wg0yad2nwbgy4q1qaazxl8ni49lkkr4hyp8pc";
+    };
+  };
+
+  golang_protobuf_extensions = buildGoPackage rec {
+    rev = "fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a";
+    name = "golang-protobuf-extensions-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/matttproud/golang_protobuf_extensions";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "matttproud";
+      repo = "golang_protobuf_extensions";
+      sha256 = "0ajg41h6402big484drvm72wvid1af2sffw0qkzbmpy04lq68ahj";
+    };
+
+    buildInputs = [ protobuf ];
+  };
+
+  goleveldb = buildGoPackage rec {
+    rev = "e9e2c8f6d3b9c313fb4acaac5ab06285bcf30b04";
+    name = "goleveldb-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/syndtr/goleveldb";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "syndtr";
+      repo = "goleveldb";
+      sha256 = "0vg3pcrbdhbmanwkc5njxagi64f4k2ikfm173allcghxcjamrkwv";
+    };
+    propagatedBuildInputs = [ ginkgo gomega gosnappy ];
+  };
+
+  gomega = buildGoPackage rec {
+    rev = "8adf9e1730c55cdc590de7d49766cb2acc88d8f2";
+    name = "gomega-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/onsi/gomega";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "onsi";
+      repo = "gomega";
+      sha256 = "1rf6cxn50d1pji3pv4q372s395r5nxwcgp405z2r2mfdkri4v3w4";
+    };
+  };
+
+  google-api-go-client = buildGoPackage rec {
+    rev = "34c5554e6406f7f715ede3616b39034247545ce0";
+    name = "google-api-go-client-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "google.golang.org/api";
+
+    preBuild = ''
+      rm -rf go/src/${goPackagePath}/examples
+    '';
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "google";
+      repo = "google-api-go-client";
+      sha256 = "1496h0xc7vjklr4m4j7vy1764k1qk2grpcwz5zssgplpfs9s9wfz";
+    };
+
+    buildInputs = [ net ];
+  };
+
+  gosnappy = buildGoPackage rec {
+    rev = "ce8acff4829e0c2458a67ead32390ac0a381c862";
+    name = "gosnappy-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/syndtr/gosnappy";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "syndtr";
+      repo = "gosnappy";
+      sha256 = "0ywa52kcii8g2a9lbqcx8ghdf6y56lqq96sl5nl9p6h74rdvmjr7";
+    };
+  };
+
+  gox = buildGoPackage rec {
+    rev = "e8e6fd4fe12510cc46893dff18c5188a6a6dc549";
+    name = "gox-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/mitchellh/gox";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "mitchellh";
+      repo   = "gox";
+      sha256 = "14jb2vgfr6dv7zlw8i3ilmp125m5l28ljv41a66c9b8gijhm48k1";
+    };
+    buildInputs = [ iochan ];
   };
 
   go-assert = buildGoPackage rec {
@@ -252,7 +544,7 @@ let self = _self // overrides; _self = with self; {
 
     meta = with stdenv.lib; {
       homepage    = "https://github.com/jteeuwen/go-bindata";
-      description = "A small utility which generates Go code from any file. Useful for embedding binary data in a Go program.";
+      description = "A small utility which generates Go code from any file, useful for embedding binary data in a Go program";
       maintainers = with maintainers; [ cstrahan ];
       license     = licenses.cc0 ;
       platforms   = platforms.all;
@@ -271,6 +563,19 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  go-etcd = buildGoPackage rec {
+    rev = "4734e7aca379f0d7fcdf04fbb2101696a4b45ce8";
+    name = "go-etcd-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/coreos/go-etcd";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "coreos";
+      repo = "go-etcd";
+      sha256 = "0zqr7mzd5kq0rnxj3zx5x5wwbmjkg365farwv72hzrsvq6g8zczr";
+    };
+    buildInputs = [ pkgs.etcd ];
+  };
+
   go-fuse = buildGoPackage rec {
     rev = "5d16aa11eef4643de2d91e88a64dcb6138705d58";
     name = "go-fuse-${stdenv.lib.strings.substring 0 7 rev}";
@@ -284,6 +589,33 @@ let self = _self // overrides; _self = with self; {
     subPackages = [ "fuse" "fuse/nodefs" "fuse/pathfs" ];
   };
 
+  go-github = buildGoPackage rec {
+    rev = "9eb187bac4eba6fff5a54f80550b2df73b651523";
+    name = "go-github-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/google/go-github";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "google";
+      repo = "go-github";
+      sha256 = "123ck9nf5ggdrndg2gs1bhr4ysh4z0izph9sp7ciisxpgjkaycxq";
+    };
+
+    buildInputs = [ go-querystring oauth2 ];
+  };
+
+  go-homedir = buildGoPackage rec {
+    rev = "7d2d8c8a4e078ce3c58736ab521a40b37a504c52";
+    name = "go-homedir-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/mitchellh/go-homedir";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "mitchellh";
+      repo   = "go-homedir";
+      sha256 = "1ixhwxnvq1qx53asq47yhg3l88ndwrnyw4fkkidcjg759dc86d0i";
+    };
+  };
+
   go-hostpool = buildGoPackage rec {
     rev = "fed86fae5cacdc77e7399937e2f8836563620a2e";
     name = "go-hostpool-${stdenv.lib.strings.substring 0 7 rev}";
@@ -294,6 +626,47 @@ let self = _self // overrides; _self = with self; {
       repo = "go-hostpool";
       sha256 = "0nbssfp5ksj4hhc0d8lfq54afd9nqv6qzk3vi6rinxr3fgplrj44";
     };
+  };
+
+  go-ini = buildGoPackage rec {
+    rev = "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1";
+    name = "go-ini-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/vaughan0/go-ini";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "vaughan0";
+      repo   = "go-ini";
+      sha256 = "1l1isi3czis009d9k5awsj4xdxgbxn4n9yqjc1ac7f724x6jacfa";
+    };
+  };
+
+  go-log = buildGoPackage rec {
+    rev = "70d039bee4b0e389e5be560491d8291708506f59";
+    name = "go-log-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/coreos/go-log";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "coreos";
+      repo = "go-log";
+      sha256 = "1s95xmmhcgw4ascf4zr8c4ij2n4s3mr881nxcpmc61g0gb722b13";
+    };
+    buildInputs = [ go-systemd osext ];
+  };
+
+  gucumber = buildGoPackage rec {
+    rev = "fba94dc5a9077fa81eb85199fa9dfdaa8af82ab5";
+    name = "gucumber-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/lsegal/gucumber";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "lsegal";
+      repo = "gucumber";
+      sha256 = "028wczwpicwmggk3221pz8ffzh30l47x8217gvdzcqq6h9iiaczr";
+    };
+
+    buildInputs = [ testify ];
+    propagatedBuildInputs = [ ansicolor ];
   };
 
   rcrowley.go-metrics = buildGoPackage rec {
@@ -311,15 +684,18 @@ let self = _self // overrides; _self = with self; {
   };
 
   armon.go-metrics = buildGoPackage rec {
-    rev = "02567bbc4f518a43853d262b651a3c8257c3f141";
+    rev = "a54701ebec11868993bc198c3f315353e9de2ed6";
     name = "armon.go-metrics-${stdenv.lib.strings.substring 0 7 rev}";
     goPackagePath = "github.com/armon/go-metrics";
+
     src = fetchFromGitHub {
       inherit rev;
       owner = "armon";
       repo = "go-metrics";
-      sha256 = "08fk3zmw0ywmdfp2qhrpv0vrk1y97hzqczrgr3y2yip3x8sr37ar";
+      sha256 = "0ia9i96nac7vnmf5qb98rs74npf3vg55kdsvmql8cwgfpmqqcfdh";
     };
+
+    buildInputs = [ prometheus.client_golang ];
   };
 
   go-msgpack = buildGoPackage rec {
@@ -359,6 +735,44 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  go-querystring = buildGoPackage rec {
+    rev = "547ef5ac979778feb2f760cdb5f4eae1a2207b86";
+    name = "go-querystring-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/google/go-querystring";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "google";
+      repo = "go-querystring";
+      sha256 = "00ani7fhydcmlsm3n93nmj1hcqp2wmzvihnb1gdzynif1hw0530y";
+    };
+  };
+
+  go-radix = buildGoPackage rec {
+    rev = "0bab926c3433cfd6490c6d3c504a7b471362390c";
+    name = "go-radix-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/armon/go-radix";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "armon";
+      repo = "go-radix";
+      sha256 = "0llq96lxh7p9426hjii8k42kq0cp1hflawh1kjwhbmi5g0jrq04d";
+    };
+  };
+
+  go-runit = buildGoPackage rec {
+    rev = "a9148323a615e2e1c93b7a9893914a360b4945c8";
+    name = "go-runit-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/soundcloud/go-runit";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "soundcloud";
+      repo = "go-runit";
+      sha256 = "00f2rfhsaqj2wjanh5qp73phx7x12a5pwd7lc0rjfv68l6sgpg2v";
+    };
+  };
+
   go-simplejson = buildGoPackage rec {
     rev = "1cfceb0e12f47ec02665ef480212d7b531d6f4c5";
     name = "go-simplejson-${stdenv.lib.strings.substring 0 7 rev}";
@@ -395,7 +809,21 @@ let self = _self // overrides; _self = with self; {
       sha256 = "1r9s1gsa4azcs05gx1179ixk7qvrkrik3v92wr4s8gwm00m0gf81";
     };
   };
- 
+
+  go-systemd = buildGoPackage rec {
+    rev = "2d21675230a81a503f4363f4aa3490af06d52bb8";
+    name = "go-systemd-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/coreos/go-systemd";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "coreos";
+      repo = "go-systemd";
+      sha256 = "07g5c8khlcjnr86gniw3zr7l8jwrb9fhrj18zm5n6ccj24nidwam";
+    };
+    subPackages = [ "activation" "daemon" "dbus" "journal" "login1" ];
+    buildInputs = [ dbus ];
+  };
+
   go-update = buildGoPackage rec {
     rev = "c1385108bc3a016f1c88b75ea7d2e2a356a1571d";
     name = "go-update-${stdenv.lib.strings.substring 0 7 rev}";
@@ -420,6 +848,75 @@ let self = _self // overrides; _self = with self; {
       owner = "inconshreveable";
       repo = "go-vhost";
       sha256 = "1rway6sls6fl2s2jk20ajj36rrlzh9944ncc9pdd19kifix54z32";
+    };
+  };
+
+  grafana = buildGoPackage rec {
+    version = "2.0.0-beta1";
+    name = "grafana-v${version}";
+    goPackagePath = "github.com/grafana/grafana";
+    preBuild = "export GOPATH=$GOPATH:$NIX_BUILD_TOP/go/src/${goPackagePath}/Godeps/_workspace";
+    src = fetchFromGitHub {
+      rev = "v${version}";
+      owner = "grafana";
+      repo = "grafana";
+      sha256 = "1b263qj7n72xc5qn0hhrlivqrd0zc8746c9ic11kdxyf81nx4lza";
+    };
+    subPackages = [ "./" ];
+  };
+
+  grpc = buildGoPackage rec {
+    rev = "f5ebd86be717593ab029545492c93ddf8914832b";
+    name = "grpc-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "google.golang.org/grpc";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "grpc";
+      repo = "grpc-go";
+      sha256 = "07dfpwwk68rrhxmqj69gq2ncsf3kfmn0zhlwscda0gc5gb57n5x1";
+    };
+
+    propagatedBuildInputs = [ http2 glog net protobuf oauth2 ];
+  };
+
+  hologram = buildGoPackage rec {
+    rev  = "2bf08f0edee49297358bd06a0c9bf44ba9051e9c";
+    name = "hologram-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/AdRoll/hologram";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "copumpkin";
+      repo   = "hologram";
+      sha256 = "1ra6rdniqh3pi84fm29zam4irzv52a1dd2sppaqngk07f7rkkhi4";
+    };
+    buildInputs = [ crypto protobuf goamz rgbterm go-bindata go-homedir ldap g2s gox ];
+  };
+
+  http2 = buildGoPackage rec {
+    rev = "f8202bc903bda493ebba4aa54922d78430c2c42f";
+    name = "http2-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/bradfitz/http2";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "bradfitz";
+      repo = "http2";
+      sha256 = "0cza2126jbji5vijwk4dxs05hifnff04xcr0vhxvafs6hz3sacvr";
+    };
+
+    buildInputs = [ crypto ];
+  };
+
+  httprouter = buildGoPackage rec {
+    rev = "bde5c16eb82ff15a1734a3818d9b9547065f65b1";
+    name = "httprouter-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/julienschmidt/httprouter";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "julienschmidt";
+      repo = "httprouter";
+      sha256 = "1l74pvqqhhval4vfnhca9d6i1ij69qs3ljf41w3m1l2id42rq7r9";
     };
   };
 
@@ -456,6 +953,20 @@ let self = _self // overrides; _self = with self; {
       repo = "iochan";
       sha256 = "1fcwdhfci41ibpng2j4c1bqfng578cwzb3c00yw1lnbwwhaq9r6b";
     };
+  };
+
+  ldap = buildGoPackage rec {
+    rev = "469fe5a802d61523b40dbb29bb8012a6b99b06b5";
+    name = "ldap-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/nmcclain/ldap";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "nmcclain";
+      repo   = "ldap";
+      sha256 = "0xq5dc03ym0wlg9mvf4gbrmj74l4c8bgkls8fd7c98a128qw2srk";
+    };
+    propagatedBuildInputs = [ asn1-ber ];
+    subPackages = [ "./" ];
   };
 
   log4go = buildGoPackage rec {
@@ -524,9 +1035,23 @@ let self = _self // overrides; _self = with self; {
     propagatedBuildInputs = [ go-codec armon.go-metrics ];
   };
 
+  mesos-stats = buildGoPackage rec {
+    rev = "0c6ea494c19bedc67ebb85ce3d187ec21050e920";
+    name = "mesos-stats-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/antonlindstrom/mesos_stats";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "antonlindstrom";
+      repo = "mesos_stats";
+      sha256 = "18ggyjf4nyn77gkn16wg9krp4dsphgzdgcr3mdflv6mvbr482ar4";
+    };
+
+    propagatedBuildInputs = [ prometheus.client_golang glog ];
+  };
+
   mgo = buildGoPackage rec {
     rev = "2";
-    name = "mgo-${rev}"; 
+    name = "mgo-${rev}";
     goPackagePath = "launchpad.net/mgo";
     src = fetchbzr {
       inherit rev;
@@ -556,6 +1081,44 @@ let self = _self // overrides; _self = with self; {
       owner = "vmihailenco";
       repo = "msgpack";
       sha256 = "1dj5scpfhgnw0yrh0w6jlrb9d03halvsv4l3wgjhazrrimdqf0q0";
+    };
+  };
+
+  mysql = buildGoPackage rec {
+    rev = "0cc29e9fe8e25c2c58cf47bcab566e029bbaa88b";
+    name = "mysql-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/go-sql-driver/mysql";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "go-sql-driver";
+      repo = "mysql";
+      sha256 = "0ydvd0mk53793sj3hgycsx926zvzxipxvppld1i175g3pn4d41xp";
+    };
+  };
+
+  ntp = buildGoPackage rec {
+    rev = "0a5264e2563429030eb922f258229ae3fee5b5dc";
+    name = "ntp-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/beevik/ntp";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "beevik";
+      repo = "ntp";
+      sha256 = "03fvgbjf2aprjj1s6wdc35wwa7k1w5phkixzvp5n1j21sf6w4h24";
+    };
+  };
+
+  objx = buildGoPackage rec {
+    rev = "cbeaeb16a013161a98496fad62933b1d21786672";
+    name = "objx-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/stretchr/objx";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "stretchr";
+      repo = "objx";
+      sha256 = "1xn7iibjik77h6h0jilfvcjkkzaqz45baf44p3rb2i03hbmkqkp1";
     };
   };
 
@@ -622,6 +1185,19 @@ let self = _self // overrides; _self = with self; {
     };
   };
 
+  beorn7.perks = buildGoPackage rec {
+    rev = "b965b613227fddccbfffe13eae360ed3fa822f8d";
+    name = "beorn7.perks-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/beorn7/perks";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "beorn7";
+      repo = "perks";
+      sha256 = "1p8zsj4r0g61q922khfxpwxhdma2dx4xad1m5qx43mfn28kxngqk";
+    };
+  };
+
   pflag = buildGoPackage rec {
     date = "20131112";
     rev = "94e98a55fb412fcbcfc302555cb990f5e1590627";
@@ -648,6 +1224,54 @@ let self = _self // overrides; _self = with self; {
     propagatedBuildInputs = [ kr.text ];
   };
 
+  prometheus.client_golang = buildGoPackage rec {
+    name = "prometheus-client-${version}";
+    version = "0.5.0";
+    goPackagePath = "github.com/prometheus/client_golang";
+
+    src = fetchFromGitHub {
+      owner = "prometheus";
+      repo = "client_golang";
+      rev = "${version}";
+      sha256 = "0aaf20iv797dj2vr5lnqk006aw7n0cclmxlpk8xy6c6nrn6fm3nv";
+    };
+
+    propagatedBuildInputs = [
+      goautoneg
+      protobuf
+      golang_protobuf_extensions
+      prometheus.client_model
+      prometheus.procfs
+      beorn7.perks
+    ];
+  };
+
+  prometheus.client_model = buildGoPackage rec {
+    rev = "fa8ad6fec33561be4280a8f0514318c79d7f6cb6";
+    name = "prometheus-client-model-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/prometheus/client_model";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "prometheus";
+      repo = "client_model";
+      sha256 = "11a7v1fjzhhwsl128znjcf5v7v6129xjgkdpym2lial4lac1dhm9";
+    };
+    buildInputs = [ protobuf ];
+  };
+
+  prometheus.procfs = buildGoPackage rec {
+    rev = "351fbfac67c8ae8bcacd468f678f5e8d5a585d3d";
+    name = "prometheus-procfs-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/prometheus/procfs";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "prometheus";
+      repo = "procfs";
+      sha256 = "0hxssp6h1cs7l2cvnxj1hyacy3328hhpi1pd123f2a57aikha9ff";
+    };
+  };
+
   pty = buildGoPackage rec {
     rev = "67e2db24c831afa6c64fc17b4a143390674365ef";
     name = "pty-${stdenv.lib.strings.substring 0 7 rev}";
@@ -658,6 +1282,68 @@ let self = _self // overrides; _self = with self; {
       repo = "pty";
       sha256 = "1l3z3wbb112ar9br44m8g838z0pq2gfxcp5s3ka0xvm1hjvanw2d";
     };
+  };
+
+  pushover = buildGoPackage rec {
+    rev = "a8420a1935479cc266bda685cee558e86dad4b9f";
+    name = "pushover-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/thorduri/pushover";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "thorduri";
+      repo = "pushover";
+      sha256 = "0j4k43ppka20hmixlwhhz5mhv92p6wxbkvdabs4cf7k8jpk5argq";
+    };
+  };
+
+  raw = buildGoPackage rec {
+    rev = "724aedf6e1a5d8971aafec384b6bde3d5608fba4";
+    name = "raw-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/feyeleanor/raw";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "feyeleanor";
+      repo   = "raw";
+      sha256 = "0z4dcnadgk0fbxxd14dqa1wzzr0v3ksqlzd0swzs2mipim5wjgsz";
+    };
+  };
+
+  rgbterm = buildGoPackage rec {
+    rev = "c07e2f009ed2311e9c35bca12ec00b38ccd48283";
+    name = "rgbterm-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/aybabtme/rgbterm";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "aybabtme";
+      repo   = "rgbterm";
+      sha256 = "1qph7drds44jzx1whqlrh1hs58k0wv0v58zyq2a81hmm72gsgzam";
+    };
+  };
+
+  sets = buildGoPackage rec {
+    rev = "6c54cb57ea406ff6354256a4847e37298194478f";
+    name = "sets-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/feyeleanor/sets";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "feyeleanor";
+      repo   = "sets";
+      sha256 = "1l3hyl8kmwb9k6qi8x4w54g2cmydap0g3cqvs47bhvm47rg1j1zc";
+    };
+    propagatedBuildInputs = [ slices ];
+  };
+
+  slices = buildGoPackage rec {
+    rev = "bb44bb2e4817fe71ba7082d351fd582e7d40e3ea";
+    name = "slices-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/feyeleanor/slices";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner  = "feyeleanor";
+      repo   = "slices";
+      sha256 = "1miqhzqgww41d8xbvmxfzx9rsfxgw742nqz96mhjkxpadrxg870v";
+    };
+    propagatedBuildInputs = [ raw ];
   };
 
   snappy-go = buildGoPackage rec {
@@ -697,6 +1383,21 @@ let self = _self // overrides; _self = with self; {
     subPackages = [ "./" ]; # prevent building _demos
   };
 
+  testify = buildGoPackage rec {
+    rev = "dab07ac62d4905d3e48d17dc549c684ac3b7c15a";
+    name = "testify-${stdenv.lib.strings.substring 0 7 rev}";
+    goPackagePath = "github.com/stretchr/testify";
+
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "stretchr";
+      repo = "testify";
+      sha256 = "0r24v9ly3g68ywqyri14fn8smvkw8zvrzbivxw3ndd6jxcvi84b7";
+    };
+
+    buildInputs = [ objx ];
+  };
+
   kr.text = buildGoPackage rec {
     rev = "6807e777504f54ad073ecef66747de158294b639";
     name = "kr.text-${stdenv.lib.strings.substring 0 7 rev}";
@@ -733,6 +1434,20 @@ let self = _self // overrides; _self = with self; {
       sha256 = "01k0c2g395j65vm1w37mmrfkg6nm900khjrrizzpmx8f8yf20dky";
     };
     buildInputs = [ pkgconfig libusb ];
+  };
+
+  vulcand = buildGoPackage rec {
+    rev = "v0.8.0-beta.3";
+    name = "vulcand-${rev}";
+    goPackagePath = "github.com/mailgun/vulcand";
+    preBuild = "export GOPATH=$GOPATH:$NIX_BUILD_TOP/go/src/${goPackagePath}/Godeps/_workspace";
+    src = fetchFromGitHub {
+      inherit rev;
+      owner = "mailgun";
+      repo = "vulcand";
+      sha256 = "08mal9prwlsav63r972q344zpwqfql6qw6v4ixbn1h3h32kk3ic6";
+    };
+    subPackages = [ "./" ];
   };
 
   websocket = buildGoPackage rec {
