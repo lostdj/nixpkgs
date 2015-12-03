@@ -1,31 +1,30 @@
-{ stdenv, lib, fetchurl, fetchpatch, SDL, boost, cmake, ffmpeg, gettext, glew
+{ stdenv, lib, fetchurl, SDL, boost, cmake, ffmpeg, gettext, glew
 , ilmbase, libXi, libjpeg, libpng, libsamplerate, libsndfile
 , libtiff, mesa, openal, opencolorio, openexr, openimageio, openjpeg, python
-, zlib, fftw
-, jackaudioSupport ? false, jack2
-, cudaSupport ? false, cudatoolkit65
+, zlib, fftw, opensubdiv
+, jackaudioSupport ? false, libjack2
+, cudaSupport ? false, cudatoolkit
 , colladaSupport ? true, opencollada
 }:
 
 with lib;
 
 stdenv.mkDerivation rec {
-  name = "blender-2.74";
+  name = "blender-2.76b";
 
   src = fetchurl {
     url = "http://download.blender.org/source/${name}.tar.gz";
-    sha256 = "178i19pz7jl79b4wn92869j6qymawsa0kaw1dxaprbjnqsvcx8qc";
+    sha256 = "0pb0mlj4vj0iir528ifqq67nsh3ca1942933d9cwlbpcja2jm1dx";
   };
-
-  patches = [ ./sm52.patch ];
 
   buildInputs =
     [ SDL boost boost.lib cmake ffmpeg gettext glew ilmbase libXi
       libjpeg libpng libsamplerate libsndfile libtiff mesa openal
       opencolorio openexr openimageio /* openjpeg */ python zlib fftw
+      (opensubdiv.override { inherit cudaSupport; })
     ]
-    ++ optional jackaudioSupport jack2
-    ++ optional cudaSupport cudatoolkit65
+    ++ optional jackaudioSupport libjack2
+    ++ optional cudaSupport cudatoolkit
     ++ optional colladaSupport opencollada;
 
   postUnpack =
@@ -43,6 +42,7 @@ stdenv.mkDerivation rec {
       "-DWITH_GAMEENGINE=ON"
       "-DWITH_OPENCOLORIO=ON"
       "-DWITH_PLAYER=ON"
+      "-DWITH_OPENSUBDIV=ON"
       "-DPYTHON_LIBRARY=python${python.majorVersion}m"
       "-DPYTHON_LIBPATH=${python}/lib"
       "-DPYTHON_INCLUDE_DIR=${python}/include/python${python.majorVersion}m"

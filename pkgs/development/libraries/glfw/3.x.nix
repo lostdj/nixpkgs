@@ -1,20 +1,30 @@
-{ stdenv, fetchurl, cmake, mesa, libXrandr, libXi, libXxf86vm, libXfixes, x11 }:
+{ stdenv, fetchFromGitHub, cmake, mesa, libXrandr, libXi, libXxf86vm, libXfixes, xlibsWrapper
+, libXinerama, libXcursor
+}:
 
 stdenv.mkDerivation rec {
-  name = "glfw-3.0.4";
+  version = "3.1.2";
+  name = "glfw-${version}";
 
-  src = fetchurl {
-    url = "mirror://sourceforge/glfw/${name}.tar.bz2";
-    sha256 = "1h7g16ncgkl38w19x4dvnn17k9j0kqfvbb9whw9qc71lkq5xf2ag";
+  src = fetchFromGitHub {
+    owner = "glfw";
+    repo = "GLFW";
+    rev = "${version}";
+    sha256 = "1aj1dfyyd0170gpz32j2xlqbvbsxwbg028xiqai3mqc44xfp10kw";
   };
 
   enableParallelBuilding = true;
 
-  buildInputs = [ cmake mesa libXrandr libXi libXxf86vm libXfixes x11 ];
+  buildInputs = [
+    cmake mesa libXrandr libXi libXxf86vm libXfixes xlibsWrapper
+    libXinerama libXcursor
+  ];
+
+  cmakeFlags = "-DBUILD_SHARED_LIBS=ON";
 
   meta = with stdenv.lib; { 
     description = "Multi-platform library for creating OpenGL contexts and managing input, including keyboard, mouse, joystick and time";
-    homepage = "http://glfw.sourceforge.net/";
+    homepage = "http://www.glfw.org/";
     license = licenses.zlib;
     maintainers = with maintainers; [ marcweber ];
     platforms = platforms.linux;

@@ -1,16 +1,18 @@
-{ stdenv, fetchurl, makeWrapper, python, perl, zip
-, rtmpdump, nose, mock, pycrypto, substituteAll }:
+{ stdenv, fetchFromGitHub, makeWrapper, python, perl, zip
+, rtmpdump, nose, mock, pycrypto, requests2, substituteAll }:
 
 stdenv.mkDerivation rec {
   name = "svtplay-dl-${version}";
-  version = "0.10.2015.03.25";
+  version = "0.20.2015.11.29";
 
-  src = fetchurl {
-    url = "https://github.com/spaam/svtplay-dl/archive/${version}.tar.gz";
-    sha256 = "0j0fg3qrldpaf880v488rr2snw6ghpdln4l9mbvmi70rjzzxv4ap";
+  src = fetchFromGitHub {
+    owner = "spaam";
+    repo = "svtplay-dl";
+    rev = version;
+    sha256 = "10y0qxyyfw9kxiax3b0gdd38yz2y3lii75mgvlq6q6h77r3wham4";
   };
 
-  pythonPaths = [ pycrypto ];
+  pythonPaths = [ pycrypto requests2 ];
   buildInputs = [ python perl nose mock rtmpdump makeWrapper ] ++ pythonPaths;
   nativeBuildInputs = [ zip ];
 

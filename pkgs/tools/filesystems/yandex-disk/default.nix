@@ -6,18 +6,18 @@ let
   p = if stdenv.is64bit then {
       arch = "x86_64";
       gcclib = "${stdenv.cc.cc}/lib64";
-      sha256 = "061kl186vllqhl1443d9cwvp4qdhqc42yf3x72a1w0bjvn0i3z1i";
+      sha256 = "1dr976z0zgg5jk477hrnfmpcx4llh5xi1493k0pkp28m6ypbxy2q";
     }
     else {
       arch = "i386";
       gcclib = "${stdenv.cc.cc}/lib";
-      sha256 = "1l9mxlin41w83dn70cvdk1n1vn1dll3d8r120jkqn5jfhicrgvv3";
+      sha256 = "01v0caf194y6yb0zc0d3ywx3y0rwb7sxkav4ickd4l968jpi8p91";
     };
 in 
 stdenv.mkDerivation rec {
 
   name = "yandex-disk-${version}";
-  version = "0.1.5.870";
+  version = "0.1.5.940";
 
   src = fetchurl {
     url = "http://repo.yandex.ru/yandex-disk/rpm/stable/${p.arch}/${name}-1.fedora.${p.arch}.rpm";
@@ -50,7 +50,7 @@ stdenv.mkDerivation rec {
   meta = {
     homepage = http://help.yandex.com/disk/cli-clients.xml;
     description = "A free cloud file storage service";
-    maintainers = with stdenv.lib.maintainers; [smironov];
+    maintainers = with stdenv.lib.maintainers; [ smironov jagajaga ];
     platforms = ["i686-linux" "x86_64-linux"];
     license = stdenv.lib.licenses.unfree;
     longDescription = ''

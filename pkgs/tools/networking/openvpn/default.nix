@@ -3,27 +3,26 @@
 with stdenv.lib;
 
 stdenv.mkDerivation rec {
-  name = "openvpn-2.3.6";
+  name = "openvpn-2.3.8";
 
   src = fetchurl {
     url = "http://swupdate.openvpn.net/community/releases/${name}.tar.gz";
-    sha256 = "09jvxr4wcsmk55gqv3cblm60kzs9ripv9h4y50d1lbn177zx5bkv";
+    sha256 = "0lbw22qv3m0axhs13razr6b4x1p7jcpvf9rzb15b850wyvpka92k";
   };
 
   patches = optional stdenv.isLinux ./systemd-notify.patch;
 
-  buildInputs = [ iproute lzo openssl pam pkgconfig ] ++ optional stdenv.isLinux systemd;
+  buildInputs = [ lzo openssl pkgconfig ]
+                  ++ optionals stdenv.isLinux [ pam systemd iproute ];
 
   configureFlags = ''
     --enable-password-save
-    --enable-iproute2
+  '' + optionalString stdenv.isLinux ''
     --enable-systemd
+    --enable-iproute2
     IPROUTE=${iproute}/sbin/ip
-  '';
-
-  preConfigure = ''
-    substituteInPlace ./src/openvpn/console.c \
-      --replace /bin/systemd-ask-password /run/current-system/sw/bin/systemd-ask-password
+  '' + optionalString stdenv.isDarwin ''
+    --disable-plugin-auth-pam
   '';
 
   postInstall = ''

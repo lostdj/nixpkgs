@@ -19,8 +19,8 @@ stdenv.mkDerivation rec {
       add-on to your favorite shell.
     '';
     homepage = http://www.clex.sk;
-    license = with licenses; gpl2Plus;
-    platforms = with platforms; linux;
+    license = licenses.gpl2Plus;
+    platforms = platforms.linux;
     maintainers = with maintainers; [ nckx ];
   };
 

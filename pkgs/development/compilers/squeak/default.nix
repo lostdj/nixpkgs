@@ -1,8 +1,8 @@
 { stdenv, fetchurl, cmake, coreutils, dbus, freetype, glib, gnused
-, libpthreadstubs, pango, pkgconfig, pulseaudio, which }:
+, libpthreadstubs, pango, pkgconfig, libpulseaudio, which }:
 
 let version = "4.10.2.2614"; in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   name = "squeak-${version}";
 
   src = fetchurl {
@@ -24,12 +24,13 @@ stdenv.mkDerivation rec {
     homepage = http://squeakvm.org/;
     downloadPage = http://squeakvm.org/unix/index.html;
     license = with licenses; [ asl20 mit ];
-    platforms = with platforms; linux;
+    platforms = platforms.linux;
     maintainers = with maintainers; [ nckx ];
   };
 
-  buildInputs = [ cmake coreutils dbus freetype glib gnused libpthreadstubs
-    pango pkgconfig pulseaudio which ];
+  buildInputs = [ coreutils dbus freetype glib gnused libpthreadstubs
+    pango libpulseaudio which ];
+  nativeBuildInputs = [ cmake pkgconfig ];
 
   postPatch = ''
     for i in squeak.in squeak.sh.in; do

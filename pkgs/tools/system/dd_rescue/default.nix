@@ -1,12 +1,12 @@
 { stdenv, fetchurl, autoconf }:
 
 stdenv.mkDerivation rec {
-  version = "1.46";
+  version = "1.99";
   name = "dd_rescue-${version}";
 
   src = fetchurl {
-    sha256 = "1fhs4jl5pkyn4aq75fxczrgnsj2m0kz9hfa7dhxy93vp7xcba2cy";
-    url="http://www.garloff.de/kurt/linux/ddrescue/${name}.tar.gz";
+    sha256 = "0gkbwssn134fjyyvjvylyvassw4fwv5mbis9gcb969xdc64dfhg1";
+    url="http://www.garloff.de/kurt/linux/ddrescue/${name}.tar.bz2";
   };
 
   dd_rhelp_src = fetchurl {
@@ -33,7 +33,7 @@ stdenv.mkDerivation rec {
   meta = with stdenv.lib; {
     description = "A tool to copy data from a damaged block device";
     maintainers = with maintainers; [ raskin iElectric ];
-    platforms = with platforms; linux;
+    platforms = platforms.linux;
     downloadPage = "http://www.garloff.de/kurt/linux/ddrescue/";
     inherit version;
     updateWalker = true;

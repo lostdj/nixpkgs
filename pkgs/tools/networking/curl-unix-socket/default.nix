@@ -1,7 +1,7 @@
 { stdenv, fetchFromGitHub, go }:
 
 stdenv.mkDerivation {
-  name = "curl-unix-socket";
+  name = "curl-unix-socket-2014-09-01";
 
   src = fetchFromGitHub {
     owner = "Soulou";
@@ -19,6 +19,6 @@ stdenv.mkDerivation {
     license = licenses.mit;
     homepage = https://github.com/Soulou/curl-unix-socket;
     maintainers = with maintainers; [offline];
-    platforms = with platforms; unix;
+    platforms = platforms.unix;
   };
 }

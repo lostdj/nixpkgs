@@ -11,16 +11,17 @@ let
   types = import ./types.nix;
   meta = import ./meta.nix;
   debug = import ./debug.nix;
-  misc = import ./misc.nix;
+  misc = import ./deprecated.nix;
   maintainers = import ./maintainers.nix;
   platforms = import ./platforms.nix;
   systems = import ./systems.nix;
   customisation = import ./customisation.nix;
   licenses = import ./licenses.nix;
+  sandbox = import ./sandbox.nix;
 
 in
   { inherit trivial lists strings stringsWithDeps attrsets sources options
-      modules types meta debug maintainers licenses platforms systems;
+      modules types meta debug maintainers licenses platforms systems sandbox;
   }
   # !!! don't include everything at top-level; perhaps only the most
   # commonly used functions.

@@ -1,51 +1,65 @@
-{ stdenv, fetchurl, gfortran, perl, liblapack, config }:
+{ stdenv, fetchurl, gfortran, perl, which, config, coreutils
+# Most packages depending on openblas expect integer width to match pointer width,
+# but some expect to use 32-bit integers always (for compatibility with reference BLAS).
+, blas64 ? null
+}:
 
 with stdenv.lib;
 
+let blas64_ = blas64; in
+
 let local = config.openblas.preferLocalBuild or false;
     binary =
-      {
-        i686-linux = "32";
+      { i686-linux = "32";
         x86_64-linux = "64";
+        x86_64-darwin = "64";
       }."${stdenv.system}" or (throw "unsupported system: ${stdenv.system}");
     genericFlags =
-      [
-        "DYNAMIC_ARCH=1"
+      [ "DYNAMIC_ARCH=1"
         "NUM_THREADS=64"
-        "BINARY=${binary}"
       ];
     localFlags = config.openblas.flags or
       optionals (hasAttr "target" config.openblas) [ "TARGET=${config.openblas.target}" ];
-in
-stdenv.mkDerivation rec {
-  version = "0.2.14";
+    blas64 = if blas64_ != null then blas64_ else hasPrefix "x86_64" stdenv.system;
 
+    version = "0.2.15";
+in
+stdenv.mkDerivation {
   name = "openblas-${version}";
   src = fetchurl {
-    url = "https://github.com/xianyi/OpenBLAS/tarball/v${version}";
-    sha256 = "0av3pd96j8rx5i65f652xv9wqfkaqn0w4ma1gvbyz73i6j2hi9db";
+    url = "https://github.com/xianyi/OpenBLAS/archive/v${version}.tar.gz";
+    sha256 = "0i4hrjx622vw5ff35wm6cnga3ic8hcfa88p1wlj24a3qb770mi3k";
     name = "openblas-${version}.tar.gz";
   };
 
-  preBuild = "cp ${liblapack.src} lapack-${liblapack.meta.version}.tgz";
+  inherit blas64;
 
-  nativeBuildInputs = [gfortran perl];
+  nativeBuildInputs = optionals stdenv.isDarwin [coreutils] ++ [gfortran perl which];
 
   makeFlags =
     (if local then localFlags else genericFlags)
     ++
+    optionals stdenv.isDarwin ["MACOSX_DEPLOYMENT_TARGET=10.9"]
+    ++
     [
       "FC=gfortran"
-      "CC=gcc"
+      # Note that clang is available through the stdenv on OSX and
+      # thus is not an explicit dependency.
+      "CC=${if stdenv.isDarwin then "clang" else "gcc"}"
       ''PREFIX="''$(out)"''
-      "INTERFACE64=1"
+      "BINARY=${binary}"
+      "USE_OPENMP=${if stdenv.isDarwin then "0" else "1"}"
+      "INTERFACE64=${if blas64 then "1" else "0"}"
     ];
+
+  doCheck = true;
+  checkTarget = "tests";
 
   meta = with stdenv.lib; {
     description = "Basic Linear Algebra Subprograms";
     license = licenses.bsd3;
     homepage = "https://github.com/xianyi/OpenBLAS";
-    platforms = with platforms; linux;
+    platforms = platforms.unix;
     maintainers = with maintainers; [ ttuegel ];
   };
 }

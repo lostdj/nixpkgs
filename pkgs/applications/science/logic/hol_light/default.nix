@@ -1,4 +1,4 @@
-{ stdenv, fetchsvn, writeScript, ocaml, findlib, camlp5 }:
+{ stdenv, fetchFromGitHub, writeScript, ocaml, camlp5 }:
 
 let
   start_script = ''
@@ -8,17 +8,19 @@ let
   '';
 in
 
-stdenv.mkDerivation rec {
-  name     = "hol_light-${version}";
-  version  = "218";
+stdenv.mkDerivation {
+  name     = "hol_light-2015-11-02";
 
-  src = fetchsvn {
-    url = http://hol-light.googlecode.com/svn/trunk;
-    rev = version;
-    sha256 = "0lidcadyjpyqd2iw90gfrm8hb6g9gpabp54c0ps6z0lb6hdzln74";
+  src = fetchFromGitHub {
+    owner  = "jrh13";
+    repo   = "hol-light";
+    rev    = "10265313397476ddff4ce13e7bbb588025e7272c";
+    sha256 = "17b6a7vk9fhppl0h366y7pw6a9sknq1a8gxqg67dzqpb47vda1n0";
   };
 
-  buildInputs = [ ocaml findlib camlp5 ];
+  buildInputs = [ ocaml camlp5 ];
+
+  patches = [ ./Makefile.patch ];
 
   installPhase = ''
     mkdir -p "$out/lib/hol_light" "$out/bin"

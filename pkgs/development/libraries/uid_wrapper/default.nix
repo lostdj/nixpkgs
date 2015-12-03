@@ -1,14 +1,14 @@
 { stdenv, fetchurl, cmake, pkgconfig }:
 
 stdenv.mkDerivation rec {
-  name = "uid_wrapper-1.1.0";
+  name = "uid_wrapper-1.2.0";
 
   src = fetchurl {
     url = "mirror://samba/cwrap/${name}.tar.gz";
-    sha256 = "18xdyy7rvn0zg6j44ay0sxd4q0bplq64syyki9wi8ixhkrzqn0yn";
+    sha256 = "0sfznk53kmz9m3rxwbv4pwwqs4bw3kr917y4n53h5jaxjym0m4c0";
   };
 
-  buildInputs = [ cmake pkgconfig ];
+  nativeBuildInputs = [ cmake pkgconfig ];
 
   meta = with stdenv.lib; {
     description = "a wrapper for the user, group and hosts NSS API";

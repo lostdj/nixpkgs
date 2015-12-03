@@ -1,32 +1,28 @@
 { stdenv, fetchurl, buildEnv
-, xlibs, alsaLib, dbus, dbus_glib, glib, gtk, atk, pango, freetype, fontconfig
+, xorg, alsaLib, dbus, dbus_glib, glib, gtk, atk, pango, freetype, fontconfig
 , gdk_pixbuf, cairo, zlib}:
 let
-  bits = if stdenv.system == "x86_64-linux" then "64"
-         else "32";
-
   # isolated tor environment
   torEnv = buildEnv {
     name = "tor-env";
     paths = [
       stdenv.cc.cc zlib glib alsaLib dbus dbus_glib gtk atk pango freetype
-      fontconfig gdk_pixbuf cairo xlibs.libXrender xlibs.libX11 xlibs.libXext
-      xlibs.libXt
+      fontconfig gdk_pixbuf cairo xorg.libXrender xorg.libX11 xorg.libXext
+      xorg.libXt
     ];
   };
 
-  ldLibraryPath = if bits == "64" then torEnv+"/lib:"+torEnv+"/lib64"
-        else torEnv+"/lib";
+  ldLibraryPath = ''${torEnv}/lib${stdenv.lib.optionalString stdenv.is64bit ":${torEnv}/lib64"}'';
 
 in stdenv.mkDerivation rec {
   name = "tor-browser-${version}";
-  version = "4.5";
+  version = "5.0.4";
 
   src = fetchurl {
-    url = "https://archive.torproject.org/tor-package-archive/torbrowser/${version}/tor-browser-linux${bits}-${version}_en-US.tar.xz";
-    sha256 = if bits == "64" then
-      "15scfjzpbih7pzpqh4jd7jmc9g93sx2myfs6ykr70f5hbc7qhwmg" else
-      "0lrvhka3z9bh0snplsnxshs8i9iww187ipfn7f96hp5rxgl30p49";
+    url = "https://archive.torproject.org/tor-package-archive/torbrowser/${version}/tor-browser-linux${if stdenv.is64bit then "64" else "32"}-${version}_en-US.tar.xz";
+    sha256 = if stdenv.is64bit then
+      "03vn1wkkpgr6wzd6iiyqs7zv7yxl9q99j755n8l2579bd10w1xcn" else
+      "1yc13cykr4fafz6r8hnjccl0s33sk297c779cknbdbhj3z3yn163";
   };
 
   patchPhase = ''

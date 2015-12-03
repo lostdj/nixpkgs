@@ -45,7 +45,7 @@ assert deepClone -> leaveDotGit;
 stdenv.mkDerivation {
   inherit name;
   builder = ./builder.sh;
-  fetcher = ./nix-prefetch-git;
+  fetcher = "${stdenv.shell} ${./nix-prefetch-git}";
   buildInputs = [git];
 
   outputHashAlgo = if sha256 == "" then "md5" else "sha256";
@@ -54,7 +54,7 @@ stdenv.mkDerivation {
 
   inherit url rev leaveDotGit fetchSubmodules deepClone branchName;
 
-  GIT_SSL_CAINFO = "${cacert}/etc/ca-bundle.crt";
+  GIT_SSL_CAINFO = "${cacert}/etc/ssl/certs/ca-bundle.crt";
 
   impureEnvVars = [
     # We borrow these environment variables from the caller to allow

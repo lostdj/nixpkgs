@@ -1,6 +1,14 @@
 # TODO tidy up eg The patchelf code is patching gvim even if you don't build it..
 # but I have gvim with python support now :) - Marc
-args@{pkgs, source ? "default", ...}: with args;
+args@{pkgs, source ? "default", fetchurl, fetchhg, stdenv, ncurses, pkgconfig, gettext
+, composableDerivation, lib, config, glib, gtk, python, perl, tcl, ruby
+, libX11, libXext, libSM, libXpm, libXt, libXaw, libXau, libXmu
+, libICE
+
+# apple frameworks
+, CoreServices, CoreData, Cocoa, Foundation, libobjc, cf-private
+
+, ... }: with args;
 
 
 let inherit (args.composableDerivation) composableDerivation edf;
@@ -31,9 +39,10 @@ let inherit (args.composableDerivation) composableDerivation edf;
   '';
 in
 composableDerivation {
-} (fix: {
+} (fix: rec {
 
-    name = "vim_configurable-7.4.516";
+    name = "vim_configurable-${version}";
+    version = "7.4.826";
 
     enableParallelBuilding = true; # test this
 
@@ -43,8 +52,8 @@ composableDerivation {
         # latest release
       args.fetchhg {
             url = "http://vim.googlecode.com/hg/";
-            rev = "v7-4-516";
-            sha256 = "0a3b5qaywfn7jjr7fjpl8y8jx4wjj2630wxfjnmn3hi1l7iiz4z8";
+            rev = "v${version}";
+            sha256 = "01m67lvnkz0ad28ifj964zcg63y5hixplbnzas5xarj8vl3pc5a0";
       };
 
       "vim-nox" =
@@ -84,7 +93,14 @@ composableDerivation {
           '';
         };
       }
-      // edf { name = "darwin"; } #Disable Darwin (Mac OS X) support.
+      // edf {
+        name = "darwin";
+        enable = {
+          nativeBuildInputs = [ CoreServices CoreData Cocoa Foundation libobjc cf-private ];
+          NIX_LDFLAGS = stdenv.lib.optional stdenv.isDarwin
+            "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
+        };
+      } #Disable Darwin (Mac OS X) support.
       // edf { name = "xsmp"; } #Disable XSMP session management
       // edf { name = "xsmp_interact"; } #Disable XSMP interaction
       // edf { name = "mzscheme"; feat = "mzschemeinterp";} #Include MzScheme interpreter.
@@ -190,6 +206,7 @@ composableDerivation {
   meta = with stdenv.lib; {
     description = "The most popular clone of the VI editor";
     homepage    = http://www.vim.org;
+    license = licenses.vim;
     maintainers = with maintainers; [ lovek323 ];
     platforms   = platforms.unix;
   };

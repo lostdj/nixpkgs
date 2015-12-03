@@ -20,8 +20,8 @@ stdenv.mkDerivation {
       which can also easily be used to show your records on a web page.
     '';
     homepage = https://github.com/rpodgorny/uptimed/;
-    license = with licenses; gpl2;
-    platforms = with platforms; linux;
+    license = licenses.gpl2;
+    platforms = platforms.linux;
   };
 
   patches = [ ./no-var-spool-install.patch ];

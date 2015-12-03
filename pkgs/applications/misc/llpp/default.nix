@@ -1,19 +1,20 @@
 { stdenv, makeWrapper, fetchgit, pkgconfig, ninja, ocaml, findlib, mupdf, lablgl
-, gtk3, openjpeg, jbig2dec, mujs, xsel }:
+, gtk3, openjpeg, jbig2dec, mujs, xsel, openssl }:
 
 let ocamlVersion = (builtins.parseDrvName (ocaml.name)).version;
 in stdenv.mkDerivation rec {
   name = "llpp-${version}";
-  version = "21-git-2015-04-27";
+  version = "21-git-2015-07-30";
 
   src = fetchgit {
     url = "git://repo.or.cz/llpp.git";
-    rev = "66868744188151eaa433d42c807e1efc5f623aa4";
-    sha256 = "04hjbkzxixw88xmrpbr1smq486wfw3q9hvy7b4bfcb9j32mazk5c";
+    rev = "e9fe06d684b145a104cc319673076e069e853cac";
+    sha256 = "0x3hgn6sfjln2sqdw40ylcj943rn732a6mlfwz01llx8ykiyvsvq";
+    fetchSubmodules = false;
   };
 
   buildInputs = [ pkgconfig ninja makeWrapper ocaml findlib mupdf lablgl
-                  gtk3 jbig2dec openjpeg mujs ];
+                  gtk3 jbig2dec openjpeg mujs openssl ];
 
   configurePhase = ''
       sh configure.sh -O -F ${mupdf}

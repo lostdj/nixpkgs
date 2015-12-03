@@ -10,6 +10,8 @@ let lib = import ../../../lib; in lib.makeOverridable (
 , setupScript ? ./setup.sh
 
 , extraBuildInputs ? []
+, __stdenvImpureHostDeps ? []
+, __extraImpureHostDeps ? []
 }:
 
 let
@@ -19,11 +21,13 @@ let
   whitelist = config.whitelistedLicenses or [];
   blacklist = config.blacklistedLicenses or [];
 
+  ifDarwin = attrs: if system == "x86_64-darwin" then attrs else {};
+
   onlyLicenses = list:
     lib.lists.all (license:
       let l = lib.licenses.${license.shortName or "BROKEN"} or false; in
       if license == l then true else
-        throw ''‘${builtins.toJSON license}’ is not an attribute of lib.licenses''
+        throw ''‘${showLicense license}’ is not an attribute of lib.licenses''
     ) list;
 
   mutuallyExclusive = a: b:
@@ -69,6 +73,8 @@ let
     isUnfree (lib.lists.toList attrs.meta.license) &&
     !allowUnfreePredicate attrs;
 
+  showLicense = license: license.shortName or "unknown";
+
   defaultNativeBuildInputs = extraBuildInputs ++
     [ ../../build-support/setup-hooks/move-docs.sh
       ../../build-support/setup-hooks/compress-man-pages.sh
@@ -90,6 +96,10 @@ let
     , meta ? {}
     , passthru ? {}
     , pos ? null # position used in error messages and for meta.position
+    , separateDebugInfo ? false
+    , outputs ? [ "out" ]
+    , __impureHostDeps ? []
+    , __propagatedImpureHostDeps ? []
     , ... } @ attrs:
     let
       pos' =
@@ -101,37 +111,68 @@ let
           builtins.unsafeGetAttrPos "name" attrs;
       pos'' = if pos' != null then "‘" + pos'.file + ":" + toString pos'.line + "’" else "«unknown-file»";
 
-      throwEvalHelp = unfreeOrBroken: whatIsWrong:
-        assert builtins.elem unfreeOrBroken ["Unfree" "Broken" "blacklisted"];
+      throwEvalHelp = { reason, errormsg }:
+        # uppercase the first character of string s
+        let up = s: with lib;
+          let cs = lib.stringToCharacters s;
+          in concatStrings (singleton (toUpper (head cs)) ++ tail cs);
+        in
+        assert builtins.elem reason ["unfree" "broken" "blacklisted"];
 
-        throw ("Package ‘${attrs.name or "«name-missing»"}’ in ${pos''} ${whatIsWrong}, refusing to evaluate."
-        + (lib.strings.optionalString (unfreeOrBroken != "blacklisted") ''
+        throw ("Package ‘${attrs.name or "«name-missing»"}’ in ${pos''} ${errormsg}, refusing to evaluate."
+        + (lib.strings.optionalString (reason != "blacklisted") ''
 
           For `nixos-rebuild` you can set
-            { nixpkgs.config.allow${unfreeOrBroken} = true; }
+            { nixpkgs.config.allow${up reason} = true; }
           in configuration.nix to override this.
           For `nix-env` you can add
-            { allow${unfreeOrBroken} = true; }
+            { allow${up reason} = true; }
           to ~/.nixpkgs/config.nix.
         ''));
 
-      licenseAllowed = attrs:
+      # Check if a derivation is valid, that is whether it passes checks for
+      # e.g brokenness or license.
+      #
+      # Return { valid: Bool } and additionally
+      # { reason: String; errormsg: String } if it is not valid, where
+      # reason is one of "unfree", "blacklisted" or "broken".
+      checkValidity = attrs:
         if hasDeniedUnfreeLicense attrs && !(hasWhitelistedLicense attrs) then
-          throwEvalHelp "Unfree" "has an unfree license ‘${builtins.toJSON attrs.meta.license}’ which is not whitelisted"
+          { valid = false; reason = "unfree"; errormsg = "has an unfree license (‘${showLicense attrs.meta.license}’)"; }
         else if hasBlacklistedLicense attrs then
-          throwEvalHelp "blacklisted" "has the ‘${builtins.toJSON attrs.meta.license}’ license which is blacklisted"
+          { valid = false; reason = "blacklisted"; errormsg = "has a blacklisted license (‘${showLicense attrs.meta.license}’)"; }
         else if !allowBroken && attrs.meta.broken or false then
-          throwEvalHelp "Broken" "is marked as broken"
+          { valid = false; reason = "broken"; errormsg = "is marked as broken"; }
         else if !allowBroken && attrs.meta.platforms or null != null && !lib.lists.elem result.system attrs.meta.platforms then
-          throwEvalHelp "Broken" "is not supported on ‘${result.system}’"
-        else true;
+          { valid = false; reason = "broken"; errormsg = "is not supported on ‘${result.system}’"; }
+        else { valid = true; };
+
+      outputs' =
+        outputs ++
+        (if separateDebugInfo then assert result.isLinux; [ "debug" ] else []);
+
+      buildInputs' = buildInputs ++
+        (if separateDebugInfo then [ ../../build-support/setup-hooks/separate-debug-info.sh ] else []);
 
     in
-      assert licenseAllowed attrs;
+
+      # Throw an error if trying to evaluate an non-valid derivation
+      assert let v = checkValidity attrs;
+             in if !v.valid
+               then throwEvalHelp (removeAttrs v ["valid"])
+               else true;
 
       lib.addPassthru (derivation (
-        (removeAttrs attrs ["meta" "passthru" "crossAttrs" "pos"])
-        //
+        (removeAttrs attrs
+          ["meta" "passthru" "crossAttrs" "pos"
+           "__impureHostDeps" "__propagatedImpureHostDeps"])
+        // (let
+          # TODO: remove lib.unique once nix has a list canonicalization primitive
+          computedImpureHostDeps =
+            lib.unique (lib.concatMap (input: input.__propagatedImpureHostDeps or []) (extraBuildInputs ++ buildInputs ++ nativeBuildInputs));
+          computedPropagatedImpureHostDeps =
+            lib.unique (lib.concatMap (input: input.__propagatedImpureHostDeps or []) (propagatedBuildInputs ++ propagatedNativeBuildInputs));
+        in
         {
           builder = attrs.realBuilder or shell;
           args = attrs.args or ["-e" (attrs.builder or ./default-builder.sh)];
@@ -141,13 +182,23 @@ let
           __ignoreNulls = true;
 
           # Inputs built by the cross compiler.
-          buildInputs = if crossConfig != null then buildInputs else [];
+          buildInputs = if crossConfig != null then buildInputs' else [];
           propagatedBuildInputs = if crossConfig != null then propagatedBuildInputs else [];
           # Inputs built by the usual native compiler.
-          nativeBuildInputs = nativeBuildInputs ++ (if crossConfig == null then buildInputs else []);
+          nativeBuildInputs = nativeBuildInputs ++ (if crossConfig == null then buildInputs' else []);
           propagatedNativeBuildInputs = propagatedNativeBuildInputs ++
             (if crossConfig == null then propagatedBuildInputs else []);
-        })) (
+        } // ifDarwin {
+          __impureHostDeps = computedImpureHostDeps ++ computedPropagatedImpureHostDeps ++ __propagatedImpureHostDeps ++ __impureHostDeps ++ __extraImpureHostDeps ++ [
+            "/dev/zero"
+            "/dev/random"
+            "/dev/urandom"
+            "/bin/sh"
+          ];
+          __propagatedImpureHostDeps = computedPropagatedImpureHostDeps ++ __propagatedImpureHostDeps;
+        } // (if outputs' != [ "out" ] then {
+          outputs = outputs';
+        } else { })))) (
       {
         # The meta attribute is passed in the resulting attribute set,
         # but it's not part of the actual derivation, i.e., it's not
@@ -179,6 +230,9 @@ let
       setup = setupScript;
 
       inherit preHook initialPath shell defaultNativeBuildInputs;
+    }
+    // ifDarwin {
+      __impureHostDeps = __stdenvImpureHostDeps;
     })
 
     // rec {
@@ -210,16 +264,19 @@ let
             || system == "i686-gnu"
             || system == "i686-freebsd"
             || system == "i686-openbsd"
+            || system == "i686-cygwin"
             || system == "i386-sunos";
       isx86_64 = system == "x86_64-linux"
               || system == "x86_64-darwin"
               || system == "x86_64-freebsd"
               || system == "x86_64-openbsd"
+              || system == "x86_64-cygwin"
               || system == "x86_64-solaris";
       is64bit = system == "x86_64-linux"
              || system == "x86_64-darwin"
              || system == "x86_64-freebsd"
              || system == "x86_64-openbsd"
+             || system == "x86_64-cygwin"
              || system == "x86_64-solaris"
              || system == "mips64el-linux";
       isMips = system == "mips-linux"

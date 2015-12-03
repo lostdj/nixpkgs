@@ -1,11 +1,11 @@
 { stdenv, fetchFromGitHub, valgrind }:
 
-let version = "129"; in
+let version = "131"; in
 stdenv.mkDerivation rec {
   name = "lz4-${version}";
 
   src = fetchFromGitHub {
-    sha256 = "0liq5gvnikchgvalpi52hq0npwlh84w94bj79dcbrcw19may5dwi";
+    sha256 = "1bhvcq8fxxsqnpg5qa6k3nsyhq0nl0iarh08sqzclww27hlpyay2";
     rev = "r${version}";
     repo = "lz4";
     owner = "Cyan4973";
@@ -15,13 +15,13 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  makeFlags = "PREFIX=$(out)";
+  makeFlags = [ "PREFIX=$(out)" ];
 
-  doCheck = true;
+  doCheck = false; # tests take a very long time
   checkTarget = "test";
-  checkFlags = "-j1"; # required since version 128
 
   meta = with stdenv.lib; {
+    inherit version;
     description = "Extremely fast compression algorithm";
     longDescription = ''
       Very fast lossless compression algorithm, providing compression speed
@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
     '';
     homepage = https://code.google.com/p/lz4/;
     license = with licenses; [ bsd2 gpl2Plus ];
-    platforms = with platforms; linux;
+    platforms = platforms.linux;
     maintainers = with maintainers; [ nckx ];
   };
 }

@@ -41,6 +41,9 @@ with stdenv.lib;
     PM_RUNTIME y
   ''}
   PM_ADVANCED_DEBUG y
+  ${optionalString (versionAtLeast version "3.11") ''
+    X86_INTEL_LPSS y
+  ''}
   ${optionalString (versionAtLeast version "3.10") ''
     X86_INTEL_PSTATE y
   ''}
@@ -54,6 +57,7 @@ with stdenv.lib;
   STANDALONE n
 
   # Make /proc/config.gz available.
+  IKCONFIG y
   IKCONFIG_PROC y
 
   # Optimize with -O2, not -Os.
@@ -131,13 +135,19 @@ with stdenv.lib;
   FB_SIS_300 y
   FB_SIS_315 y
   FB_3DFX_ACCEL y
+  FB_VESA y
+  FRAMEBUFFER_CONSOLE y
   ${optionalString (versionOlder version "3.9" || stdenv.system == "i686-linux") ''
     FB_GEODE y
   ''}
 
   # Video configuration.
   # Enable KMS for devices whose X.org driver supports it.
-  DRM_I915_KMS y
+  ${optionalString (versionOlder version "4.3") ''
+    DRM_I915_KMS y
+  ''}
+  # Allow specifying custom EDID on the kernel command line
+  DRM_LOAD_EDID_FIRMWARE y
   ${optionalString (versionOlder version "3.9") ''
     DRM_RADEON_KMS? y
   ''}
@@ -190,18 +200,26 @@ with stdenv.lib;
   OCFS2_DEBUG_MASKLOG? n
   BTRFS_FS_POSIX_ACL y
   UBIFS_FS_ADVANCED_COMPR? y
-  ${optionalString (versionAtLeast version "3.6") ''
-    NFS_SWAP y
-  ''}
-  ${optionalString (versionAtLeast version "3.11") ''
-    NFS_V4_1 y  # NFSv4.1 client support
-    NFS_V4_2 y
+  ${optionalString (versionAtLeast version "4.0") ''
+    NFSD_PNFS y
   ''}
   NFSD_V2_ACL y
   NFSD_V3 y
   NFSD_V3_ACL y
   NFSD_V4 y
+  ${optionalString (versionAtLeast version "3.11") ''
+    NFSD_V4_SECURITY_LABEL y
+  ''}
   NFS_FSCACHE y
+  ${optionalString (versionAtLeast version "3.6") ''
+    NFS_SWAP y
+  ''}
+  NFS_V3_ACL y
+  ${optionalString (versionAtLeast version "3.11") ''
+    NFS_V4_1 y  # NFSv4.1 client support
+    NFS_V4_2 y
+    NFS_V4_SECURITY_LABEL y
+  ''}
   CIFS_XATTR y
   CIFS_POSIX y
   CIFS_FSCACHE y
@@ -226,7 +244,9 @@ with stdenv.lib;
   # Security related features.
   STRICT_DEVMEM y # Filter access to /dev/mem
   SECURITY_SELINUX_BOOTPARAM_VALUE 0 # Disable SELinux by default
-  DEVKMEM? n # Disable /dev/kmem
+  ${optionalString (!(features.grsecurity or false)) ''
+    DEVKMEM n # Disable /dev/kmem
+  ''}
   ${if versionOlder version "3.14" then ''
     CC_STACKPROTECTOR? y # Detect buffer overflows on the stack
   '' else ''
@@ -244,7 +264,7 @@ with stdenv.lib;
   MICROCODE y
   MICROCODE_INTEL y
   MICROCODE_AMD y
-  ${optionalString (versionAtLeast version "3.11") ''
+  ${optionalString (versionAtLeast version "3.11" && versionOlder version "4.4") ''
     MICROCODE_EARLY y
     MICROCODE_INTEL_EARLY y
     MICROCODE_AMD_EARLY y
@@ -259,7 +279,9 @@ with stdenv.lib;
   ${optionalString (versionAtLeast version "3.3" && versionOlder version "3.13") ''
     AUDIT_LOGINUID_IMMUTABLE y
   ''}
-  B43_PCMCIA? y
+  ${optionalString (versionOlder version "4.4") ''
+    B43_PCMCIA? y
+  ''}
   BLK_DEV_CMD640_ENHANCED y # CMD640 enhanced support
   BLK_DEV_IDEACPI y # IDE ACPI support
   BLK_DEV_INTEGRITY y
@@ -292,10 +314,16 @@ with stdenv.lib;
   LOGO n # not needed
   MEDIA_ATTACH y
   MEGARAID_NEWGEN y
+  ${optionalString (versionAtLeast version "3.15") ''
+    MLX4_EN_VXLAN y
+  ''}
   MODVERSIONS y
   MOUSE_PS2_ELANTECH y # Elantech PS/2 protocol extension
   MTRR_SANITIZER y
   NET_FC y # Fibre Channel driver support
+  ${optionalString (versionAtLeast version "3.11") ''
+    PINCTRL_BAYTRAIL y # GPIO on Intel Bay Trail, for some Chromebook internal eMMC disks
+  ''}
   PPP_MULTILINK y # PPP multilink support
   PPP_FILTER y
   REGULATOR y # Voltage and Current Regulator Support
@@ -309,6 +337,7 @@ with stdenv.lib;
   SERIAL_8250 y # 8250/16550 and compatible serial support
   SLIP_COMPRESSED y # CSLIP compressed headers
   SLIP_SMART y
+  HWMON y
   THERMAL_HWMON y # Hardware monitoring support
   ${optionalString (versionAtLeast version "3.15") ''
     UEVENT_HELPER n
@@ -322,6 +351,7 @@ with stdenv.lib;
   X86_MCE y
 
   # Linux containers.
+  NAMESPACES? y #  Required by 'unshare' used by 'nixos-install'
   RT_GROUP_SCHED? y
   CGROUP_DEVICE? y
   ${if versionAtLeast version "3.6" then ''
@@ -367,14 +397,33 @@ with stdenv.lib;
 
   # Virtualisation.
   PARAVIRT? y
-  ${if versionAtLeast version "3.10" then ''
-    HYPERVISOR_GUEST? y
-  '' else ''
-    PARAVIRT_GUEST? y
-  ''}
-  KVM_GUEST? y
+  ${optionalString (!(features.grsecurity or false))
+    (if versionAtLeast version "3.10" then ''
+      HYPERVISOR_GUEST y
+    '' else ''
+      PARAVIRT_GUEST? y
+    '')
+  }
+  KVM_APIC_ARCHITECTURE y
+  KVM_ASYNC_PF y
   ${optionalString (versionOlder version "3.7") ''
     KVM_CLOCK? y
+  ''}
+  ${optionalString (versionAtLeast version "4.0") ''
+    KVM_COMPAT? y
+  ''}
+  ${optionalString (versionAtLeast version "3.10") ''
+    KVM_DEVICE_ASSIGNMENT? y
+  ''}
+  ${optionalString (versionAtLeast version "4.0") ''
+    KVM_GENERIC_DIRTYLOG_READ_PROTECT y
+  ''}
+  ${optionalString (!features.grsecurity or true) ''
+    KVM_GUEST y
+  ''}
+  KVM_MMIO y
+  ${optionalString (versionAtLeast version "3.13") ''
+    KVM_VFIO y
   ''}
   XEN? y
   XEN_DOM0? y
@@ -437,13 +486,18 @@ with stdenv.lib;
   ''}
   ZRAM m
 
-  ${optionalString (versionAtLeast version "3.17") "NFC? n"}
+  # Enable PCIe and USB for the brcmfmac driver
+  BRCMFMAC_USB? y
+  BRCMFMAC_PCIE? y
 
-  # Enable firmware loading via udev. Only needed for non-declarative
-  # firmware in /root/test-firmware.
-  ${optionalString (versionAtLeast version "3.17") ''
-    FW_LOADER_USER_HELPER_FALLBACK y
+  # Support x2APIC (which requires IRQ remapping).
+  ${optionalString (stdenv.system == "x86_64-linux") ''
+    X86_X2APIC y
+    IRQ_REMAP y
   ''}
+
+  # Disable the firmware helper fallback, udev doesn't implement it any more
+  FW_LOADER_USER_HELPER_FALLBACK? n
 
   ${kernelPlatform.kernelExtraConfig or ""}
   ${extraConfig}

@@ -9,6 +9,16 @@ stdenv.mkDerivation rec {
     url = "http://foremost.sourceforge.net/pkg/${name}.tar.gz";
   };
 
+  patches = [ ./makefile.patch ];
+
+  makeFlags = [ "PREFIX=$(out)" ];
+
+  enableParallelBuilding = true;
+
+  preInstall = ''
+    mkdir -p $out/{bin,share/man/man8}
+  '';
+
   meta = with stdenv.lib; {
     inherit version;
     description = "Recover files based on their contents";
@@ -22,18 +32,8 @@ stdenv.mkDerivation rec {
       reliable and faster recovery.
     '';
     homepage = http://foremost.sourceforge.net/;
-    license = with licenses; publicDomain;
-    platforms = with platforms; linux;
+    license = licenses.publicDomain;
+    platforms = platforms.linux;
     maintainers = with maintainers; [ nckx ];
   };
-
-  patches = [ ./makefile.patch ];
-
-  makeFlags = "PREFIX=$(out)";
-
-  enableParallelBuilding = true;
-
-  preInstall = ''
-    mkdir -p $out/{bin,share/man/man8}
-  '';
 }

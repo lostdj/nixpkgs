@@ -1,7 +1,7 @@
 { stdenv, fetchgit, makeWrapper, openresolv, coreutils }:
 
 stdenv.mkDerivation rec {
-  name = "update-resolv-conf";
+  name = "update-resolv-conf-20141003";
 
   src = fetchgit {
     url = https://github.com/masterkorp/openvpn-update-resolv-conf/;

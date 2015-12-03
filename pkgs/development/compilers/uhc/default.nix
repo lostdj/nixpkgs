@@ -1,14 +1,18 @@
 { stdenv, coreutils, fetchgit, m4, libtool, clang, ghcWithPackages }:
 
-let wrappedGhc = ghcWithPackages (hpkgs: with hpkgs; [shuffle hashable mtl network uhc-util uulib] );
+let wrappedGhc = ghcWithPackages (hpkgs: with hpkgs; [fgl vector syb uulib network binary hashable uhc-util mtl transformers directory containers array process filepath shuffle uuagc] );
 in stdenv.mkDerivation rec {
-  version = "1.1.9.0";
+  # Important:
+  # The commits "Fixate/tag v..." are the released versions.
+  # Ignore the "bumped version to ...." commits, they do not
+  # correspond to releases.
+  version = "1.1.9.2";
   name = "uhc-${version}";
 
   src = fetchgit {
     url = "https://github.com/UU-ComputerScience/uhc.git";
-    rev = "0363bbcf4cf8c47d30c3a188e3e53b3f8454bbe4";
-    sha256 = "0sa9b341mm5ggmbydc33ja3h7k9w65qnki9gsaagb06gkvvqc7c2";
+    rev = "292d259113b98c32154a5be336875751caa5edbc";
+    sha256 = "1f462xq9ilkp9mnxm8hxhh1cdwps5d0hxysyibxryk32l7hh53cz";
   };
 
   postUnpack = "sourceRoot=\${sourceRoot}/EHC";
@@ -46,5 +50,6 @@ in stdenv.mkDerivation rec {
     # On Darwin, the GNU libtool is used, which does not
     # support the -static flag and thus breaks the build.
     platforms = ["x86_64-linux"];
+
   };
 }

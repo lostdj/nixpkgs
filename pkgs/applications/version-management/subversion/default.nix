@@ -8,6 +8,7 @@
 , stdenv, fetchurl, apr, aprutil, zlib, sqlite
 , apacheHttpd ? null, expat, swig ? null, jdk ? null, python ? null, perl ? null
 , sasl ? null, serf ? null
+, branch ? "1.9"
 }:
 
 assert bdbSupport -> aprutil.bdbSupport;
@@ -15,15 +16,26 @@ assert httpServer -> apacheHttpd != null;
 assert pythonBindings -> swig != null && python != null;
 assert javahlBindings -> jdk != null && perl != null;
 
+let
+  config = {
+    "1.9".ver_min = "2";
+    "1.9".sha1 = "fb9db3b7ddf48ae37aa8785872301b59bfcc7017";
+
+    "1.8".ver_min = "14";
+    "1.8".sha1 = "0698efc58373e7657f6dd3ce13cab7b002ffb497";
+  };
+in
+assert builtins.hasAttr branch config;
+
 stdenv.mkDerivation (rec {
 
-  version = "1.8.13";
+  version = "${branch}." + config.${branch}.ver_min;
 
   name = "subversion-${version}";
 
   src = fetchurl {
     url = "mirror://apache/subversion/${name}.tar.bz2";
-    sha1 = "aa0bd14ac6a8f0fb178cc9ff325387de01cd7452";
+    inherit (config.${branch}) sha1;
   };
 
   buildInputs = [ zlib apr aprutil sqlite ]
@@ -37,7 +49,7 @@ stdenv.mkDerivation (rec {
     ${if httpServer then "--with-apxs=${apacheHttpd}/bin/apxs" else "--without-apxs"}
     ${if pythonBindings || perlBindings then "--with-swig=${swig}" else "--without-swig"}
     ${if javahlBindings then "--enable-javahl --with-jdk=${jdk}" else ""}
-    ${if stdenv.isDarwin then "--enable-keychain" else "--disable-keychain"}
+    --disable-keychain
     ${if saslSupport then "--with-sasl=${sasl}" else "--without-sasl"}
     ${if httpSupport then "--with-serf=${serf}" else "--without-serf"}
     --with-zlib=${zlib}

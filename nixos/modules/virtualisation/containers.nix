@@ -12,6 +12,12 @@ let
     perl = "${pkgs.perl}/bin/perl -I${pkgs.perlPackages.FileSlurp}/lib/perl5/site_perl";
     su = "${pkgs.shadow.su}/bin/su";
     inherit (pkgs) utillinux;
+
+    postInstall = ''
+      t=$out/etc/bash_completion.d
+      mkdir -p $t
+      cp ${./nixos-container-completion.sh} $t/nixos-container
+    '';
   };
 
   # The container's init script, a small wrapper around the regular
@@ -40,6 +46,41 @@ let
     '';
 
   system = config.nixpkgs.system;
+
+  bindMountOpts = { name, config, ... }: {
+  
+    options = {
+      mountPoint = mkOption {
+        example = "/mnt/usb";
+        type = types.str;
+        description = "Mount point on the container file system.";
+      };
+      hostPath = mkOption {
+        default = null;
+        example = "/home/alice";
+        type = types.nullOr types.str;
+        description = "Location of the host path to be mounted.";
+      };
+      isReadOnly = mkOption {
+        default = true;
+        example = true;
+        type = types.bool;
+        description = "Determine whether the mounted path will be accessed in read-only mode.";
+      };
+    };
+    
+    config = {
+      mountPoint = mkDefault name;
+    };
+    
+  };
+  
+  mkBindFlag = d:
+               let flagPrefix = if d.isReadOnly then " --bind-ro=" else " --bind=";
+                   mountstr = if d.hostPath != null then "${d.hostPath}:${d.mountPoint}" else "${d.mountPoint}";
+               in flagPrefix + mountstr ;
+
+  mkBindFlags = bs: concatMapStrings mkBindFlag (lib.attrValues bs);
 
 in
 
@@ -102,7 +143,7 @@ in
             };
 
             hostAddress = mkOption {
-              type = types.nullOr types.string;
+              type = types.nullOr types.str;
               default = null;
               example = "10.231.136.1";
               description = ''
@@ -111,12 +152,21 @@ in
             };
 
             localAddress = mkOption {
-              type = types.nullOr types.string;
+              type = types.nullOr types.str;
               default = null;
               example = "10.231.136.2";
               description = ''
                 The IPv4 address assigned to <literal>eth0</literal>
                 in the container.
+              '';
+            };
+
+            interfaces = mkOption {
+              type = types.listOf types.string;
+              default = [];
+              example = [ "eth1" "eth2" ];
+              description = ''
+                The list of interfaces to be moved into the container.
               '';
             };
 
@@ -127,6 +177,21 @@ in
                 Wether the container is automatically started at boot-time.
               '';
             };
+
+            bindMounts = mkOption {
+              type = types.loaOf types.optionSet;
+              options = [ bindMountOpts ];
+              default = {};
+              example = { "/home" = { hostPath = "/home/alice";
+                                      isReadOnly = false; };
+                        };
+                        
+              description =
+                ''
+                  An extra list of directories that is bound to the container.
+                '';
+            };
+
           };
 
           config = mkMerge
@@ -218,6 +283,10 @@ in
               extraFlags+=" --network-veth"
             fi
 
+            for iface in $INTERFACES; do
+              extraFlags+=" --network-interface=$iface"
+            done
+
             for iface in $MACVLANS; do
               extraFlags+=" --network-macvlan=$iface"
             done
@@ -230,12 +299,15 @@ in
               fi
             ''}
 
+
+
             # Run systemd-nspawn without startup notification (we'll
             # wait for the container systemd to signal readiness).
             EXIT_ON_REBOOT=1 NOTIFY_SOCKET= \
             exec ${config.systemd.package}/bin/systemd-nspawn \
               --keep-unit \
               -M "$INSTANCE" -D "$root" $extraFlags \
+              $EXTRA_NSPAWN_FLAGS \
               --bind-ro=/nix/store \
               --bind-ro=/nix/var/nix/db \
               --bind-ro=/nix/var/nix/daemon-socket \
@@ -286,7 +358,7 @@ in
             ''
               #! ${pkgs.stdenv.shell} -e
               ${nixos-container}/bin/nixos-container run "$INSTANCE" -- \
-                bash --login -c "/nix/var/nix/profiles/system/bin/switch-to-configuration test"
+                bash --login -c "''${SYSTEM_PATH:-/nix/var/nix/profiles/system}/bin/switch-to-configuration test"
             '';
 
           SyslogIdentifier = "container %i";
@@ -331,9 +403,11 @@ in
                 LOCAL_ADDRESS=${cfg.localAddress}
               ''}
             ''}
+             INTERFACES="${toString cfg.interfaces}"
            ${optionalString cfg.autoStart ''
              AUTO_START=1
            ''}
+           EXTRA_NSPAWN_FLAGS="${mkBindFlags cfg.bindMounts}"
           '';
       }) config.containers;
 

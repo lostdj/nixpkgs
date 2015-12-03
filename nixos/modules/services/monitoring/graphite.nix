@@ -41,8 +41,15 @@ let
   };
 
   carbonOpts = name: with config.ids; ''
-    --nodaemon --syslog --prefix=${name} --pidfile ${dataDir}/${name}.pid ${name}
+    --nodaemon --syslog --prefix=${name} --pidfile /run/${name}/${name}.pid ${name}
   '';
+
+  mkPidFileDir = name: ''
+    mkdir -p /run/${name}
+    chmod 0700 /run/${name}
+    chown -R graphite:graphite /run/${name}
+  '';
+
   carbonEnv = {
     PYTHONPATH = "${pkgs.python27Packages.carbon}/lib/python2.7/site-packages";
     GRAPHITE_ROOT = dataDir;
@@ -67,7 +74,7 @@ in {
       enable = mkOption {
         description = "Whether to enable graphite web frontend.";
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       host = mkOption {
@@ -95,7 +102,7 @@ in {
           <link xlink:href="http://graphite-api.readthedocs.org/en/latest/"/>
         '';
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       finders = mkOption {
@@ -177,7 +184,7 @@ in {
       enableCache = mkOption {
         description = "Whether to enable carbon cache, the graphite storage daemon.";
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       storageAggregation = mkOption {
@@ -234,7 +241,7 @@ in {
       enableRelay = mkOption {
         description = "Whether to enable carbon relay, the carbon replication and sharding service.";
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       relayRules = mkOption {
@@ -251,7 +258,7 @@ in {
       enableAggregator = mkOption {
         description = "Whether to enable carbon agregator, the carbon buffering service.";
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       aggregationRules = mkOption {
@@ -269,7 +276,7 @@ in {
       enable = mkOption {
         description = "Whether to enable seyren service.";
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       port = mkOption {
@@ -319,7 +326,7 @@ in {
           <link xlink:href="https://github.com/seatgeek/graphite-pager"/>
         '';
         default = false;
-        type = types.uniq types.bool;
+        type = types.bool;
       };
 
       redisUrl = mkOption {
@@ -354,24 +361,36 @@ in {
         type = types.lines;
       };
     };
+
+    beacon = {
+      enable = mkEnableOption "graphite beacon";
+
+      config = mkOption {
+        description = "Graphite beacon configuration.";
+        default = {};
+        type = types.attrs;
+      };
+    };
   };
 
   ###### implementation
 
   config = mkMerge [
     (mkIf cfg.carbon.enableCache {
-      systemd.services.carbonCache = {
+      systemd.services.carbonCache = let name = "carbon-cache"; in {
         description = "Graphite Data Storage Backend";
         wantedBy = [ "multi-user.target" ];
         after = [ "network-interfaces.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts "carbon-cache"}";
+          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
           PermissionsStartOnly = true;
+          PIDFile="/run/${name}/${name}.pid";
         };
-        preStart = ''
+        preStart = mkPidFileDir name + ''
+
           mkdir -p ${cfg.dataDir}/whisper
           chmod 0700 ${cfg.dataDir}/whisper
           chown -R graphite:graphite ${cfg.dataDir}
@@ -380,31 +399,35 @@ in {
     })
 
     (mkIf cfg.carbon.enableAggregator {
-      systemd.services.carbonAggregator = {
+      systemd.services.carbonAggregator = let name = "carbon-aggregator"; in {
         enable = cfg.carbon.enableAggregator;
         description = "Carbon Data Aggregator";
         wantedBy = [ "multi-user.target" ];
         after = [ "network-interfaces.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts "carbon-aggregator"}";
+          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
+          PIDFile="/run/${name}/${name}.pid";
         };
+        preStart = mkPidFileDir name;
       };
     })
 
     (mkIf cfg.carbon.enableRelay {
-      systemd.services.carbonRelay = {
+      systemd.services.carbonRelay = let name = "carbon-relay"; in {
         description = "Carbon Data Relay";
         wantedBy = [ "multi-user.target" ];
         after = [ "network-interfaces.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts "carbon-relay"}";
+          ExecStart = "${pkgs.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
+          PIDFile="/run/${name}/${name}.pid";
         };
+        preStart = mkPidFileDir name;
       };
     })
 
@@ -535,10 +558,25 @@ in {
       environment.systemPackages = [ pkgs.pythonPackages.graphite_pager ];
     })
 
+    (mkIf cfg.beacon.enable {
+      systemd.services.graphite-beacon = {
+        description = "Grpahite Beacon Alerting Daemon";
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          ExecStart = ''
+            ${pkgs.pythonPackages.graphite_beacon}/bin/graphite-beacon \
+              --config ${pkgs.writeText "graphite-beacon.json" (builtins.toJSON cfg.beacon.config)}
+          '';
+          User = "graphite";
+          Group = "graphite";
+        };
+      };
+    })
+
     (mkIf (
       cfg.carbon.enableCache || cfg.carbon.enableAggregator || cfg.carbon.enableRelay ||
       cfg.web.enable || cfg.api.enable ||
-      cfg.seyren.enable || cfg.pager.enable
+      cfg.seyren.enable || cfg.pager.enable || cfg.beacon.enable
      ) {
       users.extraUsers = singleton {
         name = "graphite";

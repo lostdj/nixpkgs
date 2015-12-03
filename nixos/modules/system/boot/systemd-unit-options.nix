@@ -42,13 +42,13 @@ in rec {
 
     requiredBy = mkOption {
       default = [];
-      type = types.listOf types.string;
+      type = types.listOf types.str;
       description = "Units that require (i.e. depend on and need to go down with) this unit.";
     };
 
     wantedBy = mkOption {
       default = [];
-      type = types.listOf types.string;
+      type = types.listOf types.str;
       description = "Units that want (i.e. depend on) this unit.";
     };
 
@@ -167,6 +167,15 @@ in rec {
         An arbitrary list of items such as derivations.  If any item
         in the list changes between reconfigurations, the service will
         be restarted.
+      '';
+    };
+
+    onFailure = mkOption {
+      default = [];
+      type = types.listOf types.str;
+      description = ''
+        A list of one or more units that are activated when
+        this unit enters the "failed" state.
       '';
     };
 

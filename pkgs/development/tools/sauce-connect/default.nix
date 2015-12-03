@@ -32,9 +32,9 @@ stdenv.mkDerivation rec {
 
   meta = {
     description = "A secure tunneling app for executing tests securely when testing behind firewalls";
-    license = "unfree";
+    license = licenses.unfree;
     homepage = https://docs.saucelabs.com/reference/sauce-connect/;
     maintainers = with maintainers; [offline];
-    platforms = with platforms; platforms.linux;
+    platforms = platforms.linux;
   };
 }

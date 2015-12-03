@@ -3,11 +3,11 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "ldb-1.1.20";
+  name = "ldb-1.1.23";
 
   src = fetchurl {
     url = "mirror://samba/ldb/${name}.tar.gz";
-    sha256 = "1ckplfvr8rp5y632w5j0abdgkj3irbzjh1wn0yxadnhz4ymknjds";
+    sha256 = "0ncmwgga6q9v7maiywgw21w6rb3149m1w2ca11yq8k5j0izjz2wg";
   };
 
   buildInputs = [
@@ -16,7 +16,6 @@ stdenv.mkDerivation rec {
   ];
 
   preConfigure = ''
-    echo $PYTHONPATH
     sed -i 's,#!/usr/bin/env python,#!${python}/bin/python,g' buildtools/bin/waf
   '';
 

@@ -29,34 +29,26 @@
 , lens
 , parallel, safe, shelly, split, stringsearch, syb
 , tar, terminfo
-, vector, yaml, fetchgit, Cabal
+, vector, yaml, fetchgit, fetchFromGitHub, Cabal
 , alex, happy, git, gnumake, autoconf, patch
 , automake, libtool
 , cryptohash
 , haddock, hspec, xhtml, primitive, cacert, pkgs
 , coreutils
 , libiconv
+
+, ghcjsBoot ? import ./ghcjs-boot.nix { inherit fetchgit; }
+, shims ? import ./shims.nix { inherit fetchFromGitHub; }
 }:
-let
-  version = "0.1.0";
-  ghcjsBoot = fetchgit {
-    url = git://github.com/ghcjs/ghcjs-boot.git;
-    rev = "19620b69257115a69306eec505a97ac843055e92"; # 7.10 branch
-    sha256 = "027md1glfakniccqq0z1pyrz5w4fy0myxmbl0h789rbcxz9ybv6n";
-    fetchSubmodules = true;
-  };
-  shims = fetchgit {
-    url = git://github.com/ghcjs/shims.git;
-    rev = "6ada4bf1a084d1b80b993303d35ed863d219b031"; # master branch
-    sha256 = "0dhfnjj3rxdbb2m1pbnjc2yp4xcgsfdrsinljgdmg0hpqkafp4vc";
-  };
-in mkDerivation (rec {
+let version = "0.2.0"; in
+mkDerivation (rec {
   pname = "ghcjs";
   inherit version;
-  src = fetchgit {
-    url = git://github.com/ghcjs/ghcjs.git;
-    rev = "d4322c2ae4467420b28eca99f0c0abd00caf5d4a"; # master branch
-    sha256 = "12mvl4l1i993j86n9wkwcs567jm13javghbxapjjsc7493xpmya5";
+  src = fetchFromGitHub {
+    owner = "ghcjs";
+    repo = "ghcjs";
+    rev = "561365ba1667053b5dc5846e2a8edb33eaa3f6dd";
+    sha256 = "1vfa7j0ql3sng29m944iznjw9hcmyl57nfkgxa33dvi2ival8dl2";
   };
   isLibrary = true;
   isExecutable = true;
@@ -103,7 +95,7 @@ in mkDerivation (rec {
 
     # Make the patches be relative their corresponding package's directory.
     # See: https://github.com/ghcjs/ghcjs-boot/pull/12
-    for patch in $topDir/ghcjs-boot/patches/*.patch; do
+    for patch in "$topDir/ghcjs-boot/patches/"*.patch; do
       echo "fixing patch: $patch"
       sed -i -e 's@ \(a\|b\)/boot/[^/]\+@ \1@g' $patch
     done

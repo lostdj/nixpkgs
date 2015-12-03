@@ -1,11 +1,11 @@
 { stdenv, fetchurl }:
 
 stdenv.mkDerivation rec {
-  name = "xz-5.2.1";
+  name = "xz-5.2.2";
 
   src = fetchurl {
     url = "http://tukaani.org/xz/${name}.tar.bz2";
-    sha256 = "101a1kih58s1ysqfncqw69qnwx1zlbjxwhnfmp0z5gz0jzs4i4b7";
+    sha256 = "1da071wyx921pyx3zkxlnbpp14p6km98pnp66mg1arwi9dxgbxbg";
   };
 
   doCheck = true;
@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
 
   postInstall = "rm -rf $out/share/doc";
 
-  meta = {
+  meta = with stdenv.lib; {
     homepage = http://tukaani.org/xz/;
     description = "XZ, general-purpose data compression software, successor of LZMA";
 
@@ -33,8 +33,8 @@ stdenv.mkDerivation rec {
          bzip2.
       '';
 
-    license = [ "GPLv2+" "LGPLv2.1+" ];
-    maintainers = with stdenv.lib.maintainers; [ sander ];
-    platforms = stdenv.lib.platforms.all;
+    license = with licenses; [ gpl2Plus lgpl21Plus ];
+    maintainers = with maintainers; [ sander ];
+    platforms = platforms.all;
   };
 }

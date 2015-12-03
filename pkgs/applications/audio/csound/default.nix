@@ -1,6 +1,6 @@
 { stdenv, fetchurl, cmake, libsndfile, flex, bison
 , alsaLib ? null
-, pulseaudio ? null
+, libpulseaudio ? null
 , tcltk ? null
 
 # maybe csound can be compiled with support for those, see configure output
@@ -12,16 +12,16 @@
 }:
 
 stdenv.mkDerivation {
-  name = "csound-6.03.2";
+  name = "csound-6.04";
 
   enableParallelBuilding = true;
 
   src = fetchurl {
-    url = mirror://sourceforge/csound/Csound6.03.2.tar.gz;
-    sha256 = "0w6ij57dbfjljpf05bb9r91jphwaq1v63rh0713vl2n11d73dy7m";
+    url = mirror://sourceforge/csound/Csound6.04.tar.gz;
+    sha256 = "1030w38lxdwjz1irr32m9cl0paqmgr02lab2m7f7j1yihwxj1w0g";
   };
 
-  buildInputs = [ cmake libsndfile flex bison alsaLib pulseaudio tcltk ];
+  buildInputs = [ cmake libsndfile flex bison alsaLib libpulseaudio tcltk ];
 
   meta = {
     description = "sound design, audio synthesis, and signal processing system, providing facilities for music composition and performance on all major operating systems and platforms";

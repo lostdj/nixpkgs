@@ -1,32 +1,31 @@
-{ stdenv, fetchurl, makeWrapper, python, zip, pandoc, ffmpeg }:
+{ stdenv, fetchurl, buildPythonPackage, makeWrapper, ffmpeg, zip
+, pandoc ? null }:
 
-with stdenv.lib;
-stdenv.mkDerivation rec {
-  name = "youtube-dl-${version}";
-  version = "2015.04.03";
+# Pandoc is required to build the package's man page. Release tarballs
+# contain a formatted man page already, though, so it's fine to pass
+# "pandoc = null" to this derivation; the man page will still be
+# installed. We keep the pandoc argument and build input in place in
+# case someone wants to use this derivation to build a Git version of
+# the tool that doesn't have the formatted man page included.
+
+buildPythonPackage rec {
+
+  name = "youtube-dl-${meta.version}";
 
   src = fetchurl {
-    url = "http://youtube-dl.org/downloads/${version}/${name}.tar.gz";
-    sha256 = "0ndzswv6vq5ld5p1ny23sh76cx6acf8yli9gi9r21dm94ida2885";
+    url = "http://yt-dl.org/downloads/${meta.version}/${name}.tar.gz";
+    sha256 = "cceeb606e723c0291de85eecb9a551ca887f3be4db786ad621011a9201a482b1";
   };
 
-  buildInputs = [ python makeWrapper zip pandoc ];
+  buildInputs = [ makeWrapper zip pandoc ];
 
-  patchPhase = ''
-    rm youtube-dl
-  '';
+  # Ensure ffmpeg is available in $PATH for post-processing & transcoding support.
+  postInstall = stdenv.lib.optionalString (ffmpeg != null)
+    ''wrapProgram $out/bin/youtube-dl --prefix PATH : "${ffmpeg}/bin"'';
 
-  configurePhase = ''
-    makeFlagsArray=( PREFIX=$out SYSCONFDIR=$out/etc PYTHON=${python}/bin/python )
-  '';
-
-  postInstall = ''
-    # ffmpeg is used for post-processing and fixups
-    wrapProgram $out/bin/youtube-dl --prefix PATH : "${ffmpeg}/bin"
-  '';
-
-  meta = {
-    homepage = "http://rg3.github.com/youtube-dl/";
+  meta = with stdenv.lib; {
+    version = "2015.11.24";
+    homepage = http://rg3.github.io/youtube-dl/;
     repositories.git = https://github.com/rg3/youtube-dl.git;
     description = "Command-line tool to download videos from YouTube.com and other sites";
     longDescription = ''

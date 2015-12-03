@@ -1,40 +1,39 @@
 { stdenv, fetchurl, gettext, libidn, pkgconfig
 , perl, perlPackages, LWP, python3
-, libiconv, libpsl, gnutls ? null }:
+, libiconv, libpsl, openssl ? null }:
 
 stdenv.mkDerivation rec {
-  name = "wget-1.16.3";
+  name = "wget-1.17";
 
   src = fetchurl {
     url = "mirror://gnu/wget/${name}.tar.xz";
-    sha256 = "0dzv5xf9qxc2bp4cyifmaghh3h464wbm73xiwcrvckf1ynqbgxv7";
+    sha256 = "11xvs919a8xr595hs6hk323rkk7yshyfdfyfdhlahagkrcxdcsdx";
   };
 
-  preConfigure = stdenv.lib.optionalString doCheck
-    '' for i in "doc/texi2pod.pl" "util/rmold.pl"
-       do
-         sed -i "$i" -e 's|/usr/bin.*perl|${perl}/bin/perl|g'
-       done
-
-       # Work around lack of DNS resolution in chroots.
-       for i in "tests/"*.pm "tests/"*.px
-       do
-         sed -i "$i" -e's/localhost/127.0.0.1/g'
-       done
-    '' + stdenv.lib.optionalString stdenv.isDarwin ''
-       export LIBS="-liconv -lintl"
-    '';
+  preConfigure = ''
+    for i in "doc/texi2pod.pl" "util/rmold.pl"; do
+      sed -i "$i" -e 's|/usr/bin.*perl|${perl}/bin/perl|g'
+    done
+  '' + stdenv.lib.optionalString doCheck ''
+    # Work around lack of DNS resolution in chroots.
+    for i in "tests/"*.pm "tests/"*.px
+    do
+      sed -i "$i" -e's/localhost/127.0.0.1/g'
+    done
+  '' + stdenv.lib.optionalString stdenv.isDarwin ''
+    export LIBS="-liconv -lintl"
+  '';
 
   nativeBuildInputs = [ gettext pkgconfig ];
   buildInputs = [ libidn libiconv libpsl ]
     ++ stdenv.lib.optionals doCheck [ perl perlPackages.IOSocketSSL LWP python3 ]
-    ++ stdenv.lib.optional (gnutls != null) gnutls
+    ++ stdenv.lib.optional (openssl != null) openssl
     ++ stdenv.lib.optional stdenv.isDarwin perl;
 
   configureFlags =
-    if gnutls != null then "--with-ssl=gnutls" else "--without-ssl";
+    if openssl != null then "--with-ssl=openssl" else "--without-ssl";
 
-  doCheck = (perl != null && python3 != null && !stdenv.isDarwin);
+  doCheck = false;
 
   meta = with stdenv.lib; {
     description = "Tool for retrieving files using HTTP, HTTPS, and FTP";

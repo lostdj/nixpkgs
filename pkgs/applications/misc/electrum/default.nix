@@ -2,11 +2,11 @@
 
 buildPythonPackage rec {
   name = "electrum-${version}";
-  version = "2.0.4";
+  version = "2.5.4";
 
   src = fetchurl {
-    url = "https://download.electrum.org/Electrum-${version}.tar.gz";
-    sha256 = "0q9vrrzy2iypfg2zvs3glzvqyq65dnwn1ijljvfqfwrkpvpp0zxp";
+    url = "https://download.electrum.org/${version}/Electrum-${version}.tar.gz";
+    sha256 = "18saa2rg07vfp9scp3i8s0wi2pqw9s8l8b44gq43zzl41120zc60";
   };
 
   propagatedBuildInputs = with pythonPackages; [
@@ -16,6 +16,7 @@ buildPythonPackage rec {
     protobuf
     pyasn1
     pyasn1-modules
+    pycrypto
     pyqt4
     qrcode
     requests
@@ -26,6 +27,7 @@ buildPythonPackage rec {
   preInstall = ''
     mkdir -p $out/share
     sed -i 's@usr_share = .*@usr_share = os.getenv("out")+"/share"@' setup.py
+    pyrcc4 icons.qrc -o gui/qt/icons_rc.py
   '';
 
   meta = with stdenv.lib; {

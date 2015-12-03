@@ -1,32 +1,30 @@
-{ lib, fetchurl, pythonPackages }:
+{ stdenv, fetchurl, pythonPackages }:
 
 pythonPackages.buildPythonPackage rec {
-  version = "0.4.3";
+  version = "0.7.3";
   name = "vdirsyncer-${version}";
   namePrefix = "";
 
   src = fetchurl {
-    url = "https://github.com/untitaker/vdirsyncer/archive/${version}.tar.gz";
-    sha256 = "0jrxmq8lq0dvqflmh42hhyvc3jjrg1cg3gzfhdcsskj9zz0m6wai";
+    url = "https://pypi.python.org/packages/source/v/vdirsyncer/${name}.tar.gz";
+    sha256 = "0ahi5ngqwsrv30bgziz35dx4gif7rbn9vqv340pigbzmywjxz1ry";
   };
 
-  pythonPath = with pythonPackages; [
-    icalendar
-    click
-    requests
+  propagatedBuildInputs = with pythonPackages; [
+    click click-log click-threading
     lxml
     setuptools
+    setuptools_scm
     requests_toolbelt
     requests2
     atomicwrites
   ];
 
-  meta = {
+  meta = with stdenv.lib; {
     homepage = https://github.com/untitaker/vdirsyncer;
     description = "Synchronize calendars and contacts";
-    maintainers = [ lib.maintainers.matthiasbeyer ];
-    platforms = lib.platforms.all;
-    license = lib.licenses.mit;
+    maintainers = with maintainers; [ matthiasbeyer jgeerds ];
+    platforms = platforms.all;
+    license = licenses.mit;
   };
 }
-

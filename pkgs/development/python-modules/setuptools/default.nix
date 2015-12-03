@@ -1,33 +1,24 @@
-{ stdenv, fetchurl, python, wrapPython, distutils-cfg }:
+{ stdenv, fetchurl, python, wrapPython }:
 
 stdenv.mkDerivation rec {
   shortName = "setuptools-${version}";
   name = "${python.executable}-${shortName}";
 
-  version = "7.0";
+  version = "18.2";  # 18.4 breaks python34Packages.characteristic and many others
 
   src = fetchurl {
     url = "http://pypi.python.org/packages/source/s/setuptools/${shortName}.tar.gz";
-    sha256 = "0qg07f035agwcz9m0p3kgdjs18xpl3h00rv28aqsfdyz1wm1m76x";
+    sha256 = "07avbdc26yl2a46s76fc7m4vg611g8sh39l26x9dr9byya6sb509";
   };
 
-  buildInputs = [ python wrapPython distutils-cfg ];
-
-  buildPhase = "${python}/bin/${python.executable} setup.py build";
-
-  installPhase =
-    ''
-      dst=$out/lib/${python.libPrefix}/site-packages
-      mkdir -p $dst
-      PYTHONPATH="$dst:$PYTHONPATH"
-      ${python}/bin/${python.executable} setup.py install --prefix=$out --install-lib=$out/lib/${python.libPrefix}/site-packages
-      wrapPythonPrograms
-    '';
-
+  buildInputs = [ python wrapPython ];
   doCheck = false;  # requires pytest
-
-  checkPhase = ''
-    ${python}/bin/${python.executable} setup.py test
+  installPhase = ''
+      dst=$out/${python.sitePackages}
+      mkdir -p $dst
+      export PYTHONPATH="$dst:$PYTHONPATH"
+      ${python.interpreter} setup.py install --prefix=$out
+      wrapPythonPrograms
   '';
 
   meta = with stdenv.lib; {
@@ -35,5 +26,5 @@ stdenv.mkDerivation rec {
     homepage = http://pypi.python.org/pypi/setuptools;
     license = [ "PSF" "ZPL" ];
     platforms = platforms.all;
-  };    
+  };
 }

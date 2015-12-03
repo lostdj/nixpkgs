@@ -126,6 +126,14 @@ let
         '';
       };
 
+      pamMount = mkOption {
+        default = config.security.pam.mount.enable;
+        type = types.bool;
+        description = ''
+          Enable PAM mount (pam_mount) system to mount fileystems on user login.
+        '';
+      };
+
       allowNullPassword = mkOption {
         default = false;
         type = types.bool;
@@ -184,6 +192,16 @@ let
         description = "Whether to log authentication failures in <filename>/var/log/faillog</filename>.";
       };
 
+      enableAppArmor = mkOption {
+        default = false;
+        type = types.bool;
+        description = ''
+          Enable support for attaching AppArmor profiles at the
+          user/group level, e.g., as part of a role based access
+          control scheme.
+        '';
+      };
+
       text = mkOption {
         type = types.nullOr types.lines;
         description = "Contents of the PAM service file.";
@@ -200,7 +218,7 @@ let
       # Samba stuff to the Samba module.  This requires that the PAM
       # module provides the right hooks.
       text = mkDefault
-        ''
+        (''
           # Account management.
           account sufficient pam_unix.so
           ${optionalString config.users.ldap.enable
@@ -223,10 +241,22 @@ let
               "auth sufficient ${pkgs.pam_u2f}/lib/security/pam_u2f.so"}
           ${optionalString cfg.usbAuth
               "auth sufficient ${pkgs.pam_usb}/lib/security/pam_usb.so"}
+        '' +
+          # Modules in this block require having the password set in PAM_AUTHTOK.
+          # pam_unix is marked as 'sufficient' on NixOS which means nothing will run
+          # after it succeeds. Certain modules need to run after pam_unix
+          # prompts the user for password so we run it once with 'required' at an
+          # earlier point and it will run again with 'sufficient' further down.
+          # We use try_first_pass the second time to avoid prompting password twice
+          (optionalString (cfg.unixAuth && (config.security.pam.enableEcryptfs || cfg.pamMount)) ''
+              auth required pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} likeauth
+              ${optionalString config.security.pam.enableEcryptfs
+                "auth optional ${pkgs.ecryptfs}/lib/security/pam_ecryptfs.so unwrap"}
+              ${optionalString cfg.pamMount
+                "auth optional ${pkgs.pam_mount}/lib/security/pam_mount.so"}
+            '') + ''
           ${optionalString cfg.unixAuth
-              "auth ${if config.security.pam.enableEcryptfs then "required" else "sufficient"} pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} likeauth"}
-          ${optionalString config.security.pam.enableEcryptfs
-              "auth required ${pkgs.ecryptfs}/lib/security/pam_ecryptfs.so unwrap"}
+              "auth sufficient pam_unix.so ${optionalString cfg.allowNullPassword "nullok"} likeauth try_first_pass"}
           ${optionalString cfg.otpwAuth
               "auth sufficient ${pkgs.otpw}/lib/security/pam_otpw.so"}
           ${optionalString cfg.oathAuth
@@ -238,12 +268,14 @@ let
             auth [default=die success=done] ${pam_ccreds}/lib/security/pam_ccreds.so action=validate use_first_pass
             auth sufficient ${pam_ccreds}/lib/security/pam_ccreds.so action=store use_first_pass
           ''}
-          ${optionalString (! config.security.pam.enableEcryptfs) "auth required pam_deny.so"}
+          auth required pam_deny.so
 
           # Password management.
+          password requisite pam_unix.so nullok sha512
           ${optionalString config.security.pam.enableEcryptfs
               "password optional ${pkgs.ecryptfs}/lib/security/pam_ecryptfs.so"}
-          password requisite pam_unix.so nullok sha512
+          ${optionalString cfg.pamMount
+              "password optional ${pkgs.pam_mount}/lib/security/pam_mount.so"}
           ${optionalString config.users.ldap.enable
               "password sufficient ${pam_ldap}/lib/security/pam_ldap.so"}
           ${optionalString config.krb5.enable
@@ -280,7 +312,11 @@ let
               "session required ${pkgs.pam}/lib/security/pam_limits.so conf=${makeLimitsConf cfg.limits}"}
           ${optionalString (cfg.showMotd && config.users.motd != null)
               "session optional ${pkgs.pam}/lib/security/pam_motd.so motd=${motd}"}
-        '';
+          ${optionalString cfg.pamMount
+              "session optional ${pkgs.pam_mount}/lib/security/pam_mount.so"}
+          ${optionalString (cfg.enableAppArmor && config.security.apparmor.enable)
+              "session optional ${pkgs.apparmor-pam}/lib/security/pam_apparmor.so order=user,group,default debug"}
+        '');
     };
 
   };
@@ -393,7 +429,7 @@ in
     users.motd = mkOption {
       default = null;
       example = "Today is Sweetmorn, the 4th day of The Aftermath in the YOLD 3178.";
-      type = types.nullOr types.string;
+      type = types.nullOr types.lines;
       description = "Message of the day shown to users when they log in.";
     };
 

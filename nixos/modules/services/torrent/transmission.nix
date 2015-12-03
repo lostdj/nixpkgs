@@ -9,7 +9,7 @@ let
   homeDir = "/var/lib/transmission";
   downloadDir = "${homeDir}/Downloads";
   incompleteDir = "${homeDir}/.incomplete";
-  
+
   settingsDir = "${homeDir}/.config/transmission-daemon";
   settingsFile = pkgs.writeText "settings.json" (builtins.toJSON fullSettings);
 
@@ -21,13 +21,13 @@ let
     else toString ''"${x}"'';
 
   # for users in group "transmission" to have access to torrents
-  fullSettings = cfg.settings // { umask = 2; };
+  fullSettings = { download-dir = downloadDir; incomplete-dir = incompleteDir; } // cfg.settings // { umask = 2; };
 in
 {
   options = {
     services.transmission = {
       enable = mkOption {
-        type = types.uniq types.bool;
+        type = types.bool;
         default = false;
         description = ''
           Whether or not to enable the headless Transmission BitTorrent daemon.
@@ -35,7 +35,7 @@ in
           Transmission daemon can be controlled via the RPC interface using
           transmission-remote or the WebUI (http://localhost:9091/ by default).
 
-          Torrents are downloaded to ${homeDir}/Downloads/ by default and are
+          Torrents are downloaded to ${downloadDir} by default and are
           accessible to users in the "transmission" group.
         '';
       };
@@ -66,7 +66,7 @@ in
       };
 
       port = mkOption {
-        type = types.uniq types.int;
+        type = types.int;
         default = 9091;
         description = "TCP port number to run the RPC/web interface.";
       };
@@ -83,7 +83,7 @@ in
       # 1) Only the "transmission" user and group have access to torrents.
       # 2) Optionally update/force specific fields into the configuration file.
       serviceConfig.ExecStartPre = ''
-          ${pkgs.stdenv.shell} -c "chmod 770 ${homeDir} && mkdir -p ${settingsDir} ${downloadDir} ${incompleteDir} && rm -f ${settingsDir}/settings.json && cp -f ${settingsFile} ${settingsDir}/settings.json"
+          ${pkgs.stdenv.shell} -c "mkdir -p ${homeDir} ${settingsDir} ${fullSettings.download-dir} ${fullSettings.incomplete-dir} && chmod 770 ${homeDir} ${settingsDir} ${fullSettings.download-dir} ${fullSettings.incomplete-dir} && rm -f ${settingsDir}/settings.json && cp -f ${settingsFile} ${settingsDir}/settings.json"
       '';
       serviceConfig.ExecStart = "${pkgs.transmission}/bin/transmission-daemon -f --port ${toString config.services.transmission.port}";
       serviceConfig.ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";

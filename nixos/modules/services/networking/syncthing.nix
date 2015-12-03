@@ -21,7 +21,7 @@ in
         description = ''
           Whether to enable the Syncthing, self-hosted open-source alternative
           to Dropbox and BittorrentSync. Initial interface will be
-          available on http://127.0.0.1:8080/.
+          available on http://127.0.0.1:8384/.
         '';
       };
 
@@ -36,11 +36,20 @@ in
       dataDir = mkOption {
         default = "/var/lib/syncthing";
         description = ''
-          Path where the `.syncthing` (settings and keys) and `Sync`
-          (your synced files) directories will exist. This can be your home
-          directory.
+          Path where the settings and keys will exist.
         '';
       };
+
+      package = mkOption {
+        type = types.package;
+        default = pkgs.syncthing;
+        example = literalExample "pkgs.syncthing";
+        description = ''
+          Syncthing package to use.
+        '';
+      };
+
+
 
     };
 
@@ -56,22 +65,19 @@ in
         description = "Syncthing service";
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
-        environment.STNORESTART = "placeholder";  # do not self-restart
-        environment.HOME = "${cfg.dataDir}";
+        environment.STNORESTART = "yes";  # do not self-restart
+        environment.STNOUPGRADE = "yes";
         serviceConfig = {
           User = "${cfg.user}";
           PermissionsStartOnly = true;
-          Restart = "always";
-          ExecStart = "${pkgs.syncthing}/bin/syncthing -home=${cfg.dataDir}/.syncthing";
+          Restart = "on-failure";
+          ExecStart = "${pkgs.syncthing}/bin/syncthing -no-browser -home=${cfg.dataDir}";
+          SuccessExitStatus = "2 3 4";
+          RestartForceExitStatus="3 4";
         };
-        preStart = ''
-          mkdir -p ${cfg.dataDir}
-          chown ${cfg.user} ${cfg.dataDir}
-        '';
-
       };
 
-    environment.systemPackages = [ pkgs.syncthing ];
+    environment.systemPackages = [ cfg.package ];
 
   };
 

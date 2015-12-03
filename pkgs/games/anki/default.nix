@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchurl, lame, mplayer, pulseaudio, portaudio
+{ stdenv, lib, fetchurl, lame, mplayer, libpulseaudio, portaudio
 , python, pyqt4, pythonPackages
 # This little flag adds a huge number of dependencies, but we assume that
 # everyone wants Anki to draw plots with statistics by default.
@@ -6,7 +6,7 @@
 
 let
     py = pythonPackages;
-    version = "2.0.32";
+    version = "2.0.33";
 in
 stdenv.mkDerivation rec {
     name = "anki-${version}";
@@ -15,16 +15,16 @@ stdenv.mkDerivation rec {
         "http://ankisrs.net/download/mirror/${name}.tgz"
         "http://ankisrs.net/download/mirror/archive/${name}.tgz"
       ];
-      sha256 = "0g5rmg0yqh40a3g8ci3y3if7vw4jl5nrpq8ki1a13a3xmgch13rr";
+      sha256 = "1d5rf5gcw98m38wam6wh3hyh7qd78ws7zipm67xg744flqsjrzmr";
     };
 
     pythonPath = [ pyqt4 py.pysqlite py.sqlalchemy9 py.pyaudio ]
               ++ lib.optional plotsSupport py.matplotlib;
 
-    buildInputs = [ python py.wrapPython lame mplayer pulseaudio ];
+    buildInputs = [ python py.wrapPython lame mplayer libpulseaudio ];
 
     preConfigure = ''
-      substituteInPlace anki \
+      substituteInPlace anki/anki \
         --replace /usr/share/ $out/share/
 
       substituteInPlace Makefile \

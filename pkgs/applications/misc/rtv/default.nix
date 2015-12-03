@@ -1,27 +1,29 @@
-{ stdenv, fetchurl, pkgs, python, pythonPackages }:
+{ stdenv, fetchFromGitHub, pkgs, lib, python, pythonPackages }:
 
 pythonPackages.buildPythonPackage rec {
-  version = "1.2.2";
+  version = "1.6.1";
   name = "rtv-${version}";
 
-  src = fetchurl {
-    url = "https://github.com/michael-lazar/rtv/archive/v${version}.tar.gz";
-    sha256 = "0pisairv28lhqvq8zs0whz3ww8fraj98941kk5idyxadbq0icmk3";
+  src = fetchFromGitHub {
+    owner = "michael-lazar";
+    repo = "rtv";
+    rev = "v${version}";
+    sha256 = "0ywx4h37b25w36vln2ydpw73ysbbkpibp597cghsfn2izlaa0i02";
   };
 
   propagatedBuildInputs = with pythonPackages; [
-    requests
+    tornado
+    requests2
     six
     praw
+    kitchen
     python.modules.curses
-  ];
+  ] ++ lib.optional (!pythonPackages.isPy3k) futures;
 
-  meta = {
+  meta = with lib; {
     homepage = https://github.com/michael-lazar/rtv;
     description = "Browse Reddit from your Terminal";
-    license = stdenv.lib.licenses.mit;
-    maintainers = with stdenv.lib.maintainers; [ matthiasbeyer ];
+    license = licenses.mit;
+    maintainers = with maintainers; [ matthiasbeyer jgeerds ];
   };
 }
-
-

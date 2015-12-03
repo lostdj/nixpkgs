@@ -67,7 +67,7 @@
 , gnutls ? null
 , gsm ? null # GSM de/encoder
 #, ilbc ? null # iLBC de/encoder
-, jack2 ? null # Jack audio (only version 2 is supported in this build)
+, libjack2 ? null # Jack audio (only version 2 is supported in this build)
 , ladspaH ? null # LADSPA audio filtering
 , lame ? null # LAME MP3 encoder
 , libass ? null # (Advanced) SubStation Alpha subtitle rendering
@@ -108,7 +108,7 @@
 #, openh264 ? null # H.264/AVC encoder
 , openjpeg_1 ? null # JPEG 2000 de/encoder
 , opensslExtlib ? false, openssl ? null
-, pulseaudio ? null # Pulseaudio input support
+, libpulseaudio ? null # Pulseaudio input support
 , rtmpdump ? null # RTMP[E] support
 #, libquvi ? null # Quvi input support
 , samba ? null # Samba protocol
@@ -138,6 +138,10 @@
 , optimizationsDeveloper ? true
 , extraWarningsDeveloper ? false
 , strippingDeveloper ? false
+/*
+ *  Darwin frameworks
+ */
+, Cocoa, CoreServices
 }:
 
 /* Maintainer notes:
@@ -157,7 +161,7 @@
  *   utvideo vo-aacenc vo-amrwbenc xvmc zvbi blackmagic-design-desktop-video
  *
  * Need fixes to support Darwin:
- *   frei0r, game-music-emu, gsm, jack2, libssh, libvpx(stable 1.3.0), openal, openjpeg_1,
+ *   frei0r, game-music-emu, gsm, libjack2, libssh, libvpx(stable 1.3.0), openal, openjpeg_1,
  *   pulseaudio, rtmpdump, samba, vid-stab, wavpack, x265. xavs
  *
  * Not supported:
@@ -230,12 +234,12 @@ assert opensslExtlib -> gnutls == null && openssl != null && nonfreeLicensing;
 assert x11grabExtlib -> libX11 != null && libXv != null;
 
 stdenv.mkDerivation rec {
-  name = "ffmpeg-${version}";
-  version = "2.6.1";
+  name = "ffmpeg-full-${version}";
+  version = "2.8.1";
 
   src = fetchurl {
-    url = "https://www.ffmpeg.org/releases/${name}.tar.bz2";
-    sha256 = "1hf77va46r8s05g5a5m7xx8b9vjzmqca0ajxsflsnbgf0s3kixm4";
+    url = "https://www.ffmpeg.org/releases/ffmpeg-${version}.tar.bz2";
+    sha256 = "1qk6g2h993i0wgs9d2p3ahdc5bqr03mp74bk6r1zj6pfinr5mvg2";
   };
 
   patchPhase = ''patchShebangs .'';
@@ -253,7 +257,7 @@ stdenv.mkDerivation rec {
     # On some ARM platforms --enable-thumb
     "--enable-shared --disable-static"
     (enableFeature true "pic")
-    (if (stdenv.cc.cc.isClang or false) then "--cc=clang" else null)
+    (if stdenv.cc.isClang then "--cc=clang" else null)
     (enableFeature smallBuild "small")
     (enableFeature runtimeCpuDetectBuild "runtime-cpudetect")
     (enableFeature grayBuild "gray")
@@ -361,7 +365,7 @@ stdenv.mkDerivation rec {
     #(enableFeature (openh264 != null) "openh264")
     (enableFeature (openjpeg_1 != null) "libopenjpeg")
     (enableFeature (opensslExtlib && gplLicensing) "openssl")
-    (enableFeature (pulseaudio != null) "libpulse")
+    (enableFeature (libpulseaudio != null) "libpulse")
     #(enableFeature quvi "libquvi")
     (enableFeature (rtmpdump != null) "librtmp")
     #(enableFeature (schroedinger != null) "libschroedinger")
@@ -397,15 +401,16 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     bzip2 celt fontconfig freetype frei0r fribidi game-music-emu gnutls gsm
-    jack2 ladspaH lame libass libbluray libbs2b libcaca libdc1394 libmodplug
+    libjack2 ladspaH lame libass libbluray libbs2b libcaca libdc1394 libmodplug
     libogg libopus libssh libtheora libvdpau libvorbis libvpx libwebp libX11
-    libxcb libXext libXfixes libXv lzma openal openjpeg_1 pulseaudio rtmpdump
+    libxcb libXext libXfixes libXv lzma openal openjpeg_1 libpulseaudio rtmpdump
     samba SDL soxr speex vid-stab wavpack x264 x265 xavs xvidcore zeromq4 zlib
   ] ++ optional openglExtlib mesa
     ++ optionals x11grabExtlib [ libXext libXfixes ]
     ++ optionals nonfreeLicensing [ faac fdk_aac openssl ]
     ++ optional ((isLinux || isFreeBSD) && libva != null) libva
-    ++ optionals isLinux [ alsaLib libraw1394 libv4l ];
+    ++ optionals isLinux [ alsaLib libraw1394 libv4l ]
+    ++ optionals stdenv.isDarwin [ Cocoa CoreServices ];
 
   # Build qt-faststart executable
   buildPhase = optional qtFaststartProgram ''make tools/qt-faststart'';

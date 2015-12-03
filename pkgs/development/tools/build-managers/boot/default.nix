@@ -1,12 +1,12 @@
 { stdenv, fetchurl, makeWrapper, jdk }:
 
 stdenv.mkDerivation rec {
-  version = "2.0.0-rc14";
+  version = "2.4.2";
   name = "boot-${version}";
 
   src = fetchurl {
-    url = "https://github.com/boot-clj/boot/releases/download/${version}/boot.sh";
-    sha256 = "12c24aqvwq8kj6iiac18rp0n8vlzacl7dd95m983yz24w885chc0";
+    url = "https://github.com/boot-clj/boot-bin/releases/download/${version}/boot.sh";
+    sha256 = "18d7dks6vvpwpw30jffzy7qqpypw6vhlp2sj838i5rj2q0imh14c";
   };
 
   inherit jdk;

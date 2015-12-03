@@ -13,8 +13,9 @@ in stdenv.mkDerivation rec {
     sha256 = "1nlq5jbglg00c1z1vsyl627fh0mqfxvk5qyxav5vzla2b4svik2v";
   };
 
-  buildInputs = [ flac gtk libvorbis libvpx mesa pkgconfig SDL2 SDL2_mixer ]
+  buildInputs = [ flac gtk libvorbis libvpx mesa SDL2 SDL2_mixer ]
     ++ stdenv.lib.optional (stdenv.system == "i686-linux") nasm;
+  nativeBuildInputs = [ pkgconfig ];
 
   postPatch = ''
     substituteInPlace build/src/glbuild.c \
@@ -25,7 +26,11 @@ in stdenv.mkDerivation rec {
   NIX_CFLAGS_COMPILE = "-I${SDL2}/include/SDL";
   NIX_LDFLAGS = "-L${SDL2}/lib";
 
-  makeFlags = "LINKED_GTK=1 SDLCONFIG=${SDL2}/bin/sdl2-config VC_REV=${rev}";
+  makeFlags = [
+    "LINKED_GTK=1"
+    "SDLCONFIG=${SDL2}/bin/sdl2-config"
+    "VC_REV=${rev}"
+  ];
 
   desktopItem = makeDesktopItem {
     name = "eduke32";
@@ -63,7 +68,7 @@ in stdenv.mkDerivation rec {
   meta = with stdenv.lib; {
     inherit version;
     description = "Enhanched port of Duke Nukem 3D for various platforms";
-    license = with licenses; gpl2Plus;
+    license = licenses.gpl2Plus;
     homepage = http://eduke32.com;
     maintainers = with maintainers; [ nckx sander ];
   };

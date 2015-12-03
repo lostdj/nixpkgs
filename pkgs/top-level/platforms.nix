@@ -134,7 +134,7 @@ rec {
   raspberrypi = {
     name = "raspberrypi";
     kernelMajor = "2.6";
-    kernelHeadersBaseConfig = "kirkwood_defconfig";
+    kernelHeadersBaseConfig = "bcm2835_defconfig";
     kernelBaseConfig = "bcmrpi_defconfig";
     kernelArch = "arm";
     kernelAutoModules = false;
@@ -301,80 +301,6 @@ rec {
 
     kernelBaseConfig = "guruplug_defconfig";
     #kernelHeadersBaseConfig = "guruplug_defconfig";
-  };
-
-  versatileARM = {
-    name = "versatileARM";
-    kernelMajor = "2.6";
-    kernelHeadersBaseConfig = "versatile_defconfig";
-    kernelBaseConfig = "versatile_defconfig";
-    kernelArch = "arm";
-    kernelAutoModules = false;
-    kernelTarget = "zImage";
-    kernelExtraConfig =
-      ''
-        MMC_ARMMMCI y
-        #MMC_SDHCI y
-        SERIO_AMBAKMI y
-
-        AEABI y
-        RTC_CLASS y
-        RTC_DRV_PL031 y
-        PCI y
-        SCSI y
-        SCSI_DMA y
-        SCSI_ATA y
-        BLK_DEV_SD y
-        BLK_DEV_SR y
-        SCSI_SYM53C8XX_2 y
-
-        TMPFS y
-        IPV6 m
-        REISERFS_FS m
-        EXT4_FS m
-
-        IP_PNP y
-        IP_PNP_DHCP y
-        IP_PNP_BOOTP y
-        ROOT_NFS y
-      '';
-    uboot = null;
-  };
-
-  integratorCP = {
-    name = "integratorCP";
-    kernelMajor = "2.6";
-    kernelHeadersBaseConfig = "integrator_defconfig";
-    kernelBaseConfig = "integrator_defconfig";
-    kernelArch = "arm";
-    kernelAutoModules = false;
-    kernelTarget = "zImage";
-    kernelExtraConfig =
-      ''
-        # needed for qemu integrator/cp
-        SERIAL_AMBA_PL011 y
-        SERIAL_AMBA_PL011_CONSOLE y
-        SERIAL_AMBA_PL010 n
-        SERIAL_AMBA_PL010_CONSOLE n
-
-        MMC_ARMMMCI y
-        MMC_SDHCI y
-        SERIO_AMBAKMI y
-
-        CPU_ARM926T y
-        ARCH_INTEGRATOR_CP y
-        VGA_CONSOLE n
-        AEABI y
-      '';
-    uboot = null;
-    ubootConfig = "integratorcp_config";
-  };
-
-  integratorCPuboot = integratorCP // {
-    name = "integratorCPuboot";
-    kernelTarget = "uImage";
-    uboot = "upstream";
-    ubootConfig = "integratorcp_config";
   };
 
   fuloong2f_n32 = {

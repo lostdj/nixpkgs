@@ -2,11 +2,12 @@
 
 stdenv.mkDerivation rec {
   name = "source-code-pro-${version}";
-  version = "1.017";
+  version = "2.010";
+  version_italic = "1.030";
 
   src = fetchurl {
-    url="https://github.com/adobe-fonts/source-code-pro/archive/${version}R.tar.gz";
-    sha256="03q4a0f142c6zlngv6kjaik52y0yzwq5z5qj3j0fvvcbfy9sanjr";
+    url="https://github.com/adobe-fonts/source-code-pro/archive/${version}R-ro/${version_italic}R-it.tar.gz";
+    sha256="1y44p2i7hd1klq81xbh796y7n4rzjvn37jrqw0nz31k59v8a1r9y";
   };
 
   phases = "unpackPhase installPhase";

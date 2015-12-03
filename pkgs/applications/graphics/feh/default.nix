@@ -1,15 +1,16 @@
-{ stdenv, makeWrapper, fetchurl, x11, imlib2, libjpeg, libpng
+{ stdenv, makeWrapper, fetchurl, xlibsWrapper, imlib2, libjpeg, libpng
 , libXinerama, curl, libexif }:
 
 stdenv.mkDerivation rec {
-  name = "feh-2.12.1";
+  name = "feh-2.14";
 
   src = fetchurl {
     url = "http://feh.finalrewind.org/${name}.tar.bz2";
-    sha256 = "18b6yjk88ybqxsa5knk6qwi2xy7fclbzl5cpzwg0wmkr3phfq9lh";
+    sha256 = "0j5wxpqccnd0hl74z2vwv25n7qnik1n2mcm2jn0c0z7cjn4wsa9q";
   };
 
-  buildInputs = [ makeWrapper x11 imlib2 libjpeg libpng libXinerama curl libexif ];
+  nativeBuildInputs = [ makeWrapper ];
+  buildInputs = [ xlibsWrapper imlib2 libjpeg libpng libXinerama curl libexif ];
 
   preBuild = ''
     makeFlags="PREFIX=$out exif=1"

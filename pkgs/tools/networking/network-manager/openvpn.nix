@@ -8,7 +8,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/1.0/${pname}-${version}.tar.xz";
-    sha256 = "1w0v3xah0wg467jy0fd3188zla8q4l1iq0zdy28bcdipin693bfh";
+    sha256 = "132xwkgyfnpma7m6b06jhrd1g9xk5dlpx8alnsf03ls3z92bd0n9";
   };
 
   buildInputs = [ openvpn networkmanager libsecret ]

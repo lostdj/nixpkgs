@@ -1,17 +1,23 @@
 { stdenv, fetchurl, ncurses, pam ? null }:
 
 stdenv.mkDerivation rec {
-  name = "screen-4.2.1";
+  name = "screen-4.3.1";
 
   src = fetchurl {
     url = "mirror://gnu/screen/${name}.tar.gz";
-    sha256 = "105hp6qdd8rl71p81klmxiz4mlb60kh9r7czayrx40g38x858s2l";
+    sha256 = "0qwxd4axkgvxjigz9xs0kcv6qpfkrzr2gm43w9idx0z2mvw4jh7s";
   };
 
   preConfigure = ''
     configureFlags="--enable-telnet --enable-pam --infodir=$out/share/info --mandir=$out/share/man --with-sys-screenrc=/etc/screenrc --enable-colors256"
     sed -i -e "s|/usr/local|/non-existent|g" -e "s|/usr|/non-existent|g" configure Makefile.in */Makefile.in
   '';
+
+  # TODO: remove when updating the version of screen. Only a patch for 4.3.1
+  patches = stdenv.lib.optional stdenv.isDarwin (fetchurl {
+    url = "http://savannah.gnu.org/file/screen-utmp.patch\?file_id=34815";
+    sha256 = "192dsa8hm1zw8m638avzhwhnrddgizhyrwaxgwa96zr9vwai2nvc";
+  });
 
   buildInputs = [ ncurses ] ++ stdenv.lib.optional stdenv.isLinux pam;
 
@@ -45,6 +51,6 @@ stdenv.mkDerivation rec {
       '';
 
     platforms = stdenv.lib.platforms.unix;
-    maintainers = [ stdenv.lib.maintainers.simons ];
+    maintainers = with stdenv.lib.maintainers; [ simons jgeerds ];
   };
 }

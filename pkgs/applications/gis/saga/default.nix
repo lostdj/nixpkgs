@@ -2,15 +2,15 @@
   libharu, opencv, vigra, postgresql }:
 
 stdenv.mkDerivation rec {
-  name = "saga-2.1.4";
+  name = "saga-2.2.2";
 
   buildInputs = [ gdal wxGTK30 proj libharu opencv vigra postgresql libiodbc lzma jasper ];
 
   enableParallelBuilding = true;
 
   src = fetchurl {
-    url = "http://sourceforge.net/projects/saga-gis/files/SAGA%20-%202.1/SAGA%202.1.4/saga_2.1.4.tar.gz";
-    sha256 = "694e4102f592f512c635328c40fdeff33493f74698d9466bb654baf3247e7b76";
+    url = "http://downloads.sourceforge.net/project/saga-gis/SAGA%20-%202.2/SAGA%202.2.2/saga-2.2.2.tar.gz";
+    sha256 = "031cd70b7ec248f32f955a9316aefc7f7ab283c5129c49aa4bd748717d20357e";
   };
 
   meta = {

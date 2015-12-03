@@ -1,17 +1,17 @@
 { stdenv, fetchgit, zlib
-, gnutlsSupport ? false, gnutls ? null
+, gnutlsSupport ? false, gnutls ? null, nettle ? null
 , opensslSupport ? true, openssl ? null
 }:
 
 # Must have an ssl library enabled
 assert (gnutlsSupport || opensslSupport);
-assert gnutlsSupport -> ((gnutlsSupport != null) && (!opensslSupport));
-assert opensslSupport -> ((openssl != null) && (!gnutlsSupport));
+assert gnutlsSupport -> gnutlsSupport != null && nettle != null && !opensslSupport;
+assert opensslSupport -> openssl != null && !gnutlsSupport;
 
 with stdenv.lib;
 stdenv.mkDerivation rec {
   name = "rtmpdump-${version}";
-  version = "2.4";
+  version = "2015-01-15";
 
   src = fetchgit {
     url = git://git.ffmpeg.org/rtmpdump;
@@ -26,8 +26,8 @@ stdenv.mkDerivation rec {
     ++ optional stdenv.isDarwin "SYS=darwin"
     ++ optional stdenv.cc.isClang "CC=clang";
 
-  buildInputs = [ zlib ]
-    ++ optional gnutlsSupport gnutls
+  propagatedBuildInputs = [ zlib ]
+    ++ optionals gnutlsSupport [ gnutls nettle ]
     ++ optional opensslSupport openssl;
 
   meta = {

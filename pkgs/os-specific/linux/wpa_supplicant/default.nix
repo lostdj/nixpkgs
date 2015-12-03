@@ -4,18 +4,19 @@
 
 with stdenv.lib;
 stdenv.mkDerivation rec {
-  version = "2.4";
+  version = "2.5";
 
   name = "wpa_supplicant-${version}";
 
   src = fetchurl {
     url = "http://hostap.epitest.fi/releases/${name}.tar.gz";
-    sha256 = "08li21q1wjn5chrv289w666il9ah1w419y3dkq2rl4wnq0rci385";
+    sha256 = "05mkp5bx1c3z7h5biddsv0p49gkrq9ksany3anp4wdiv92p5prfc";
   };
 
   # TODO: Patch epoll so that the dbus actually responds
   # TODO: Figure out how to get privsep working, currently getting SIGBUS
   extraConfig = ''
+    CONFIG_AP=y
     CONFIG_LIBNL32=y
     CONFIG_EAP_FAST=y
     CONFIG_EAP_PWD=y
@@ -36,7 +37,7 @@ stdenv.mkDerivation rec {
     CONFIG_IEEE80211W=y
     CONFIG_TLS=openssl
     CONFIG_TLSV11=y
-    CONFIG_TLSV12=y
+    #CONFIG_TLSV12=y see #8332
     CONFIG_IEEE80211R=y
     CONFIG_DEBUG_SYSLOG=y
     #CONFIG_PRIVSEP=y
@@ -77,20 +78,10 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ pkgconfig ];
 
   patches = [
-    ./0001-P2P-Validate-SSID-element-length-before-copying-it-C.patch
     ./build-fix.patch
-    (fetchpatch {
-      name = "p2p-fix.patch";
-      url = "http://w1.fi/cgit/hostap/patch/?id=8a78e227df1ead19be8e12a4108e448887e64d6f";
-      sha256 = "1k2mcq1jv8xzi8061ixcz6j56n4i8wbq0vxcvml204q1syy2ika0";
-    })
   ];
 
   postInstall = ''
-    # Copy the wpa_priv binary which is not installed
-    mkdir -p $out/bin
-    cp -v wpa_priv $out/bin
-
     mkdir -p $out/share/man/man5 $out/share/man/man8
     cp -v "doc/docbook/"*.5 $out/share/man/man5/
     cp -v "doc/docbook/"*.8 $out/share/man/man8/
@@ -99,6 +90,7 @@ stdenv.mkDerivation rec {
     sed -e "s@/sbin/wpa_supplicant@$out&@" -i "$out/share/dbus-1/system-services/"*
     cp -v dbus/dbus-wpa_supplicant.conf $out/etc/dbus-1/system.d
     cp -v "systemd/"*.service $out/etc/systemd/system
+    rm $out/share/man/man8/wpa_priv.8
   '';
 
   meta = with stdenv.lib; {

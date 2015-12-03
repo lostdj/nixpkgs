@@ -1,17 +1,17 @@
-{ stdenv, fetchurl, pythonPackages, python }:
+{ windowsSupport ? true, stdenv, fetchurl, pythonPackages, python }:
 
 pythonPackages.buildPythonPackage rec {
-  version = "1.8.4";
+  version = "1.9.4";
   name = "ansible-${version}";
   namePrefix = "";
 
   src = fetchurl {
-    url = "http://releases.ansible.com/ansible/ansible-${version}.tar.gz";
-    sha256 = "1hcy4f6l9c23aa05yi4mr0zbqp0c6v5zq4c3dim076yfmfrh8z6k";
+    url = "https://releases.ansible.com/ansible/${name}.tar.gz";
+    sha256 = "1qvgzb66nlyc2ncmgmqhzdk0x0p2px09967p1yypf5czwjn2yb4p";
   };
 
   prePatch = ''
-    sed -i "s,\/usr\/share\/ansible\/,$out/share/ansible," lib/ansible/constants.py
+    sed -i "s,/usr/,$out," lib/ansible/constants.py
   '';
 
   doCheck = false;
@@ -19,13 +19,9 @@ pythonPackages.buildPythonPackage rec {
   dontPatchELF = true;
   dontPatchShebangs = true;
 
-  propagatedBuildInputs = with pythonPackages; [
+  pythonPath = with pythonPackages; [
     paramiko jinja2 pyyaml httplib2 boto six
-  ];
-
-  postFixup = ''
-      wrapPythonProgramsIn $out/bin "$out $pythonPath"
-  '';
+  ] ++ stdenv.lib.optional windowsSupport pywinrm;
 
   meta = with stdenv.lib; {
     homepage = "http://www.ansible.com";

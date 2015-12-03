@@ -1,25 +1,21 @@
-{ fetchurl, stdenv }:
+{ stdenv, fetchurl }:
 
 stdenv.mkDerivation rec {
-  version = "v1.1.6";
-
   name = "utf8proc-${version}";
+  version = "1.3";
 
   src = fetchurl {
-    url = "http://www.public-software-group.org/pub/projects/utf8proc/${version}/utf8proc-${version}.tar.gz";
-    sha256 = "1rwr84pw92ajjlbcxq0da7yxgg3ijngmrj7vhh2qzsr2h2kqzp7y";
+    url = "https://github.com/JuliaLang/utf8proc/archive/v${version}.tar.gz";
+    sha256 = "07r7djkmd399wl9cn0s2iqjhmm7l5iifp5h1yf2in9s366mlhkkg";
   };
 
-  installPhase = ''
-    mkdir -pv $out/lib $out/include
-    cp libutf8proc.so libutf8proc.a $out/lib
-    cp utf8proc.h $out/include
-  '';
+  makeFlags = [ "prefix=$(out)" ];
 
-  meta = {
-    description = "A library for processing UTF-8 encoded Unicode strings";
-    homepage = http://www.public-software-group.org/utf8proc;
-    license = stdenv.lib.licenses.mit;
-    platforms = stdenv.lib.platforms.all;
+  meta = with stdenv.lib; {
+    description = "A clean C library for processing UTF-8 Unicode data";
+    homepage = http://julialang.org/utf8proc;
+    license = licenses.mit;
+    platforms = platforms.all;
+    maintainers = [ maintainers.ftrvxmtrx ];
   };
 }

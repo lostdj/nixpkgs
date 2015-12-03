@@ -1,15 +1,27 @@
 { stdenv, fetchFromGitHub, cppcheck, libmrss }:
 
-let version = "1.9"; in
+let version = "2.1"; in
 stdenv.mkDerivation rec {
   name = "rsstail-${version}";
 
   src = fetchFromGitHub {
-    sha256 = "0igkkhwzhi2cxbfirmq5xgaidnv0gdhmh2w7052xqpyvzg069faf";
-    rev = "aab4fbcc5cdf82e439ea6abe562e9b648fc1a6ef";
+    sha256 = "12p69i3g1fwlw0bds9jqsdmzkid3k5a41w31d227i7vm12wcvjf6";
+    rev = "6f2436185372b3f945a4989406c4b6a934fe8a95";
     repo = "rsstail";
     owner = "flok99";
   };
+
+  buildInputs = [ libmrss ]
+    ++ stdenv.lib.optional doCheck cppcheck;
+
+  postPatch = ''
+    substituteInPlace Makefile --replace -liconv_hook ""
+  '';
+
+  makeFlags = [ "prefix=$(out)" ];
+  enableParallelBuilding = true;
+
+  doCheck = true;
 
   meta = with stdenv.lib; {
     inherit version;
@@ -19,23 +31,8 @@ stdenv.mkDerivation rec {
       detects a new entry it'll emit only that new entry.
     '';
     homepage = http://www.vanheusden.com/rsstail/;
-    license = with licenses; gpl2Plus;
-    platforms = with platforms; linux;
+    license = licenses.gpl2Plus;
+    platforms = platforms.linux;
     maintainers = with maintainers; [ nckx ];
   };
-
-  buildInputs = [ libmrss ]
-    ++ stdenv.lib.optional doCheck cppcheck;
-
-  postPatch = ''
-    substituteInPlace Makefile --replace /usr $out
-  '';
-
-  enableParallelBuilding = true;
-
-  doCheck = true;
-
-  preInstall = ''
-    mkdir -p $out/{bin,share/man/man1}
-  '';
 }

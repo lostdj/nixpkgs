@@ -1,35 +1,82 @@
-{ stdenv, fetchurl, automake, pkgconfig
-, cups, zlib, libjpeg, libusb1, pythonPackages, saneBackends, dbus
-, polkit, qtSupport ? true, qt4, pythonDBus, pyqt4, net_snmp
-, withPlugin ? false, substituteAll
+{ stdenv, fetchurl, substituteAll
+, pkgconfig
+, cups, zlib, libjpeg, libusb1, pythonPackages, saneBackends, dbus, usbutils
+, net_snmp, polkit
+, qtSupport ? true, qt4, pyqt4
+, withPlugin ? false
 }:
 
 let
 
-  name = "hplip-3.15.2";
+  version = "3.15.11";
+
+  name = "hplip-${version}";
 
   src = fetchurl {
     url = "mirror://sourceforge/hplip/${name}.tar.gz";
-    sha256 = "0z7n62vdbr0p0kls1m2sr3nhvkhx3rawcbzd0zdl0lnq8fkyq0jz";
+    sha256 = "0vbw815a3wffp6l5m7j6f78xwp9pl1vn43ppyf0lp8q4vqdp3i1k";
   };
-
-  hplip_state =
-    substituteAll
-      {
-        src = ./hplip.state;
-        # evaluated this way, version is always up-to-date
-        version = (builtins.parseDrvName name).version;
-      };
 
   plugin = fetchurl {
     url = "http://www.openprinting.org/download/printdriver/auxfiles/HP/plugins/${name}-plugin.run";
-    sha256 = "0j8z8m3ygwahka7jv3hpzvfz187lh3kzzjhcy7grgaw2k01v5frm";
+    sha256 = "00ii36y3914jd8zz4h6rn3xrf1w8szh1z8fngbl2qvs3qr9cm1m9";
   };
+
+  hplipState =
+    substituteAll
+      {
+        inherit version;
+        src = ./hplip.state;
+      };
+
+  hplipPlatforms =
+    {
+      "i686-linux"   = "x86_32";
+      "x86_64-linux" = "x86_64";
+      "armv6l-linux" = "arm32";
+      "armv7l-linux" = "arm32";
+    };
+
+  hplipArch = hplipPlatforms."${stdenv.system}"
+    or (throw "HPLIP not supported on ${stdenv.system}");
+
+  pluginArches = [ "x86_32" "x86_64" ];
 
 in
 
+assert withPlugin -> builtins.elem hplipArch pluginArches
+  || throw "HPLIP plugin not supported on ${stdenv.system}";
+
 stdenv.mkDerivation {
   inherit name src;
+
+  buildInputs = [
+    libjpeg
+    cups
+    libusb1
+    pythonPackages.python
+    pythonPackages.wrapPython
+    saneBackends
+    dbus
+    net_snmp
+  ] ++ stdenv.lib.optionals qtSupport [
+    qt4
+  ];
+
+  nativeBuildInputs = [
+    pkgconfig
+  ];
+
+  pythonPath = with pythonPackages; [
+    dbus
+    pillow
+    pygobject
+    recursivePthLoader
+    reportlab
+    usbutils
+  ] ++ stdenv.lib.optionals qtSupport [
+    pyqt4
+  ];
 
   prePatch = ''
     # HPLIP hardcodes absolute paths everywhere. Nuke from orbit.
@@ -61,19 +108,12 @@ stdenv.mkDerivation {
       policykit_dbus_sharedir=$out/share/dbus-1/system-services
       hplip_confdir=$out/etc/hp
       hplip_statedir=$out/var/lib/hp
-    ";
+    "
   '';
 
-  postInstall =
-    ''
-    wrapPythonPrograms
-    ''
-    + (stdenv.lib.optionalString withPlugin
-    (let hplip_arch =
-          if stdenv.system == "i686-linux" then "x86_32"
-          else if stdenv.system == "x86_64-linux" then "x86_64"
-          else abort "Platform must be i686-linux or x86_64-linux!";
-    in
+  enableParallelBuilding = true;
+
+  postInstall = stdenv.lib.optionalString withPlugin
     ''
     sh ${plugin} --noexec --keep
     cd plugin_tmp
@@ -88,54 +128,64 @@ stdenv.mkDerivation {
 
     mkdir -p $out/share/hplip/prnt/plugins
     for plugin in lj hbpl1; do
-      cp $plugin-${hplip_arch}.so $out/share/hplip/prnt/plugins
-      ln -s $out/share/hplip/prnt/plugins/$plugin-${hplip_arch}.so \
+      cp $plugin-${hplipArch}.so $out/share/hplip/prnt/plugins
+      ln -s $out/share/hplip/prnt/plugins/$plugin-${hplipArch}.so \
         $out/share/hplip/prnt/plugins/$plugin.so
     done
 
     mkdir -p $out/share/hplip/scan/plugins
     for plugin in bb_soap bb_marvell bb_soapht fax_marvell; do
-      cp $plugin-${hplip_arch}.so $out/share/hplip/scan/plugins
-      ln -s $out/share/hplip/scan/plugins/$plugin-${hplip_arch}.so \
+      cp $plugin-${hplipArch}.so $out/share/hplip/scan/plugins
+      ln -s $out/share/hplip/scan/plugins/$plugin-${hplipArch}.so \
         $out/share/hplip/scan/plugins/$plugin.so
     done
 
     mkdir -p $out/var/lib/hp
-    cp ${hplip_state} $out/var/lib/hp/hplip.state
+    cp ${hplipState} $out/var/lib/hp/hplip.state
 
     mkdir -p $out/etc/sane.d/dll.d
     mv $out/etc/sane.d/dll.conf $out/etc/sane.d/dll.d/hpaio.conf
 
     rm $out/etc/udev/rules.d/56-hpmud.rules
-    ''));
+  '';
 
-  buildInputs = [
-      libjpeg
-      cups
-      libusb1
-      pythonPackages.python
-      pythonPackages.wrapPython
-      saneBackends
-      dbus
-      pkgconfig
-      net_snmp
-    ] ++ stdenv.lib.optional qtSupport qt4;
+  fixupPhase = ''
+    # Wrap the user-facing Python scripts in $out/bin without turning the
+    # ones in $out /share into shell scripts (they need to be importable).
+    # Note that $out/bin contains only symlinks to $out/share.
+    for bin in $out/bin/*; do
+      py=`readlink -m $bin`
+      rm $bin
+      cp $py $bin
+      wrapPythonProgramsIn $bin "$out $pythonPath"
+      sed -i "s@$(dirname $bin)/[^ ]*@$py@g" $bin
+    done
 
-  pythonPath = with pythonPackages; [
-      pillow
-      pythonDBus
-      pygobject
-      recursivePthLoader
-      reportlab
-    ] ++ stdenv.lib.optional qtSupport pyqt4;
+    # Remove originals. Knows a little too much about wrapPythonProgramsIn.
+    rm -f $out/bin/.*-wrapped
+
+    # Merely patching shebangs in $out/share does not cause trouble.
+    for i in $out/share/hplip{,/*}/*.py; do
+      substituteInPlace $i \
+        --replace /usr/bin/python \
+        ${pythonPackages.python}/bin/${pythonPackages.python.executable} \
+        --replace "/usr/bin/env python" \
+        ${pythonPackages.python}/bin/${pythonPackages.python.executable}
+    done
+
+    wrapPythonProgramsIn $out/lib "$out $pythonPath"
+
+    substituteInPlace $out/etc/hp/hplip.conf --replace /usr $out
+  '';
 
   meta = with stdenv.lib; {
+    inherit version;
     description = "Print, scan and fax HP drivers for Linux";
     homepage = http://hplipopensource.com/;
     license = if withPlugin
       then licenses.unfree
       else with licenses; [ mit bsd2 gpl2Plus ];
-    platforms = platforms.linux;
-    maintainers = with maintainers; [ ttuegel jgeerds ];
+    platforms = [ "i686-linux" "x86_64-linux" "armv6l-linux" "armv7l-linux" ];
+    maintainers = with maintainers; [ jgeerds nckx ];
   };
 }

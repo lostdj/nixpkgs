@@ -1,5 +1,5 @@
 { stdenv, fetchurl
-, bzip2, curl, expat, jsoncpp, libarchive, xz, zlib
+, bzip2, curl, expat, libarchive, xz, zlib
 , useNcurses ? false, ncurses, useQt4 ? false, qt4
 , wantPS ? false, ps ? null
 }:
@@ -10,8 +10,8 @@ assert wantPS -> (ps != null);
 
 let
   os = stdenv.lib.optionalString;
-  majorVersion = "3.2";
-  minorVersion = "2";
+  majorVersion = "3.4";
+  minorVersion = "0";
   version = "${majorVersion}.${minorVersion}";
 in
 
@@ -22,7 +22,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "${meta.homepage}files/v${majorVersion}/cmake-${version}.tar.gz";
-    sha256 = "0y3w83al0vh9ll7fnqm3nx7l8hsl85k8iv9abxb791q36rp4xsdd";
+    sha256 = "1shwim3gfdybjx9f11ykxz5l09rh58vmvz8ip76q3i76mkv2pf55";
   };
 
   enableParallelBuilding = true;
@@ -30,17 +30,11 @@ stdenv.mkDerivation rec {
   patches =
     # Don't search in non-Nix locations such as /usr, but do search in
     # Nixpkgs' Glibc.
-    optional (stdenv ? glibc) ./search-path-3.2.patch ++
-    optional (stdenv ? cross) (fetchurl {
-      name = "fix-darwin-cross-compile.patch";
-      url = "http://public.kitware.com/Bug/file_download.php?"
-          + "file_id=4981&type=bug";
-      sha256 = "16acmdr27adma7gs9rs0dxdiqppm15vl3vv3agy7y8s94wyh4ybv";
-    });
+    optional (stdenv ? glibc) ./search-path-3.2.patch
+    ++ optional stdenv.isCygwin ./3.2.2-cygwin.patch;
 
   buildInputs =
     [ bzip2 curl expat libarchive xz zlib ]
-    ++ optional (jsoncpp != null) jsoncpp
     ++ optional useNcurses ncurses
     ++ optional useQt4 qt4;
 
@@ -49,13 +43,14 @@ stdenv.mkDerivation rec {
   CMAKE_PREFIX_PATH = stdenv.lib.concatStringsSep ":" buildInputs;
 
   configureFlags =
-    [
-      "--docdir=/share/doc/${name}"
+    [ "--docdir=/share/doc/${name}"
       "--mandir=/share/man"
-      "--system-libs"
+      "--no-system-jsoncpp"
     ]
-    ++ optional (jsoncpp == null) "--no-system-jsoncpp"
-    ++ optional useQt4 "--qt-gui";
+    ++ optional (!stdenv.isCygwin) "--system-libs"
+    ++ optional useQt4 "--qt-gui"
+    ++ ["--"]
+    ++ optional (!useNcurses) "-DBUILD_CursesDialog=OFF";
 
   setupHook = ./setup-hook.sh;
 

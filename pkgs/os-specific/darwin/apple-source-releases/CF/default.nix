@@ -1,9 +1,20 @@
 { stdenv, appleDerivation, icu, dyld, libdispatch, launchd, libclosure }:
 
+# this project uses blocks, a clang-only extension
+assert stdenv.cc.isClang;
+
 appleDerivation {
   buildInputs = [ dyld icu libdispatch launchd libclosure ];
 
-  patches = [ ./add-cf-initialize.patch ./add-cfmachport.patch ];
+  patches = [ ./add-cf-initialize.patch ./add-cfmachport.patch ./cf-bridging.patch ];
+
+  __propagatedImpureHostDeps = [
+    "/System/Library/Frameworks/CoreFoundation.framework"
+    "/usr/lib/libc++.1.dylib"
+    "/usr/lib/libc++abi.dylib"
+    "/usr/lib/libicucore.A.dylib"
+    "/usr/lib/libz.1.dylib"
+  ];
 
   preBuild = ''
     substituteInPlace Makefile \
@@ -17,6 +28,10 @@ appleDerivation {
       --replace "-licucore.A" "-licui18n -licuuc" \
       --replace 'chown -RH -f root:wheel $(DSTBASE)/CoreFoundation.framework' "" \
       --replace 'chmod -RH' 'chmod -R'
+
+    # with this file present, CoreFoundation gets a _main symbol defined, which can
+    # interfere with linking other programs
+    rm plconvert.c
 
     replacement=''$'#define __PTK_FRAMEWORK_COREFOUNDATION_KEY5 55\n#define _pthread_getspecific_direct(key) pthread_getspecific((key))\n#define _pthread_setspecific_direct(key, val) pthread_setspecific((key), (val))'
 

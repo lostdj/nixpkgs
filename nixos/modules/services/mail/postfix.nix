@@ -11,6 +11,8 @@ let
 
   mainCf =
     ''
+      compatibility_level = 2
+
       queue_directory = /var/postfix/queue
       command_directory = ${pkgs.postfix}/sbin
       daemon_directory = ${pkgs.postfix}/libexec/postfix
@@ -31,10 +33,7 @@ let
           mynetworks_style = ${cfg.networksStyle}
         ''
       else
-        # Postfix default is subnet, but let's play safe
-        ''
-          mynetworks_style = host
-        '')
+        "")
     + optionalString (cfg.hostname != "") ''
       myhostname = ${cfg.hostname}
     ''
@@ -77,8 +76,9 @@ let
       smtpd_tls_key_file = ${cfg.sslKey}
 
       smtpd_use_tls = yes
-
-      recipientDelimiter = ${cfg.recipientDelimiter}
+    ''
+    + optionalString (cfg.recipientDelimiter != "") ''
+      recipient_delimiter = ${cfg.recipientDelimiter}
     ''
     + optionalString (cfg.virtual != "") ''
       virtual_alias_maps = hash:/etc/postfix/virtual
@@ -88,7 +88,7 @@ let
   masterCf = ''
     # ==========================================================================
     # service type  private unpriv  chroot  wakeup  maxproc command + args
-    #               (yes)   (yes)   (yes)   (never) (100)
+    #               (yes)   (yes)   (no)    (never) (100)
     # ==========================================================================
     smtp      inet  n       -       n       -       -       smtpd
     #submission inet n       -       n       -       -       smtpd
@@ -231,8 +231,7 @@ in
         default = null;
         example = ["localdomain"];
         description = "
-          List of domains we agree to relay to. Default is the same as
-          destination.
+          List of domains we agree to relay to. Default is empty.
         ";
       };
 
@@ -356,46 +355,49 @@ in
         }
       ];
 
-    jobs.postfix =
-      # I copy _lots_ of shipped configuration filed
-      # that can be left as is. I am afraid the exact
-      # will list slightly change in next Postfix
-      # release, so listing them all one-by-one in an
-      # accurate way is unlikely to be better.
+    systemd.services.postfix =
       { description = "Postfix mail server";
 
         wantedBy = [ "multi-user.target" ];
         after = [ "network.target" ];
 
-        daemonType = "fork";
+        serviceConfig = {
+          Type = "forking";
+          Restart = "always";
+          PIDFile = "/var/postfix/queue/pid/master.pid";
+        };
 
-        preStart =
-          ''
-            if ! [ -d /var/spool/postfix ]; then
-              ${pkgs.coreutils}/bin/mkdir -p /var/spool/mail /var/postfix/conf /var/postfix/queue
-            fi
+        preStart = ''
+          ${pkgs.coreutils}/bin/mkdir -p /var/spool/mail /var/postfix/conf /var/postfix/queue
 
-            ${pkgs.coreutils}/bin/chown -R ${user}:${group} /var/postfix
-            ${pkgs.coreutils}/bin/chown -R ${user}:${setgidGroup} /var/postfix/queue
-            ${pkgs.coreutils}/bin/chmod -R ug+rwX /var/postfix/queue
-            ${pkgs.coreutils}/bin/chown root:root /var/spool/mail
-            ${pkgs.coreutils}/bin/chmod a+rwxt /var/spool/mail
+          ${pkgs.coreutils}/bin/chown -R ${user}:${group} /var/postfix
+          ${pkgs.coreutils}/bin/chown -R ${user}:${setgidGroup} /var/postfix/queue
+          ${pkgs.coreutils}/bin/chmod -R ug+rwX /var/postfix/queue
+          ${pkgs.coreutils}/bin/chown root:root /var/spool/mail
+          ${pkgs.coreutils}/bin/chmod a+rwxt /var/spool/mail
+          ${pkgs.coreutils}/bin/ln -sf /var/spool/mail /var/
 
-            ln -sf "${pkgs.postfix}/share/postfix/conf/"* /var/postfix/conf
+          ln -sf ${pkgs.postfix}/etc/postfix/postfix-files /var/postfix/conf
 
-            ln -sf ${aliasesFile} /var/postfix/conf/aliases
-            ln -sf ${virtualFile} /var/postfix/conf/virtual
-            ln -sf ${mainCfFile} /var/postfix/conf/main.cf
-            ln -sf ${masterCfFile} /var/postfix/conf/master.cf
+          ln -sf ${aliasesFile} /var/postfix/conf/aliases
+          ln -sf ${virtualFile} /var/postfix/conf/virtual
+          ln -sf ${mainCfFile} /var/postfix/conf/main.cf
+          ln -sf ${masterCfFile} /var/postfix/conf/master.cf
 
-            ${pkgs.postfix}/sbin/postalias -c /var/postfix/conf /var/postfix/conf/aliases
-            ${pkgs.postfix}/sbin/postmap -c /var/postfix/conf /var/postfix/conf/virtual
+          ${pkgs.postfix}/sbin/postalias -c /var/postfix/conf /var/postfix/conf/aliases
+          ${pkgs.postfix}/sbin/postmap -c /var/postfix/conf /var/postfix/conf/virtual
+        '';
 
-            ${pkgs.postfix}/sbin/postfix -c /var/postfix/conf start
-          '';
+        script = ''
+          ${pkgs.postfix}/sbin/postfix -c /var/postfix/conf start
+        '';
+
+        reload = ''
+          ${pkgs.postfix}/sbin/postfix -c /var/postfix/conf reload
+        '';
 
         preStop = ''
-            ${pkgs.postfix}/sbin/postfix -c /var/postfix/conf stop
+          ${pkgs.postfix}/sbin/postfix -c /var/postfix/conf stop
         '';
 
       };

@@ -1,4 +1,4 @@
-{ fetchurl, stdenv, dpkg, makeWrapper, xlibs, qt5, gstreamer, zlib, sqlite, libxslt }:
+{ fetchurl, stdenv, dpkg, makeWrapper, xorg, qt5Full, gstreamer, zlib, sqlite, libxslt }:
 
 assert stdenv.system == "x86_64-linux";
 
@@ -22,16 +22,16 @@ stdenv.mkDerivation rec {
   unpackPhase = "true";
 
   libPath = stdenv.lib.makeLibraryPath [
-      qt5
-      xlibs.libX11
+      qt5Full
+      xorg.libX11
       gstreamer
       zlib
       sqlite
-      xlibs.libXrender
+      xorg.libXrender
       libxslt
       stdenv.cc.cc
-      xlibs.libXScrnSaver
-      xlibs.libXext
+      xorg.libXScrnSaver
+      xorg.libXext
   ];
 
   installPhase = ''

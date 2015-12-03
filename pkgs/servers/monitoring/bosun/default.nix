@@ -1,26 +1,24 @@
 { lib, fetchFromGitHub, goPackages }:
 
-with goPackages;
+goPackages.buildGoPackage rec {
+  name = "bosun";
+  rev = "0.5.0-alpha";
 
-buildGoPackage rec {
-  rev = "20150506172827";
-  name = "bosun-${rev}";
-  goPackagePath = "bosun.org";
   src = fetchFromGitHub {
     inherit rev;
     owner = "bosun-monitor";
     repo = "bosun";
-    sha256 = "0rnfiv9b835b8j8r9qh9j2mz9mm9q45vfg9cqa4nngrgfd0cqvl8";
+    sha256 = "0nkphzkwx5r974skn269nnsqr4gllws5z4z6n53sslj2x9rz57ml";
   };
-  subPackages = [ "cmd/bosun" ];
+
+  subPackages = [ "cmd/bosun" "cmd/scollector" ];
+  goPackagePath = "bosun.org";
 
   meta = with lib; {
-    description = "Time series alerting framework";
-    longDescription = ''
-      An advanced, open-source monitoring and alerting system by Stack Exchange.
-    '';
-    homepage = http://bosun.org;
+    description = "Time Series Alerting Framework";
     license = licenses.mit;
-    platforms = platforms.unix;
+    homepage = https://bosun.org;
+    maintainers = with maintainers; [ offline ];
+    platforms = platforms.linux;
   };
 }

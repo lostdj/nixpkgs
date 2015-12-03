@@ -1,5 +1,5 @@
 { pkgs, stdenv, fetchurl, python, buildPythonPackage, pythonPackages, mygpoclient, intltool,
-  ipodSupport ? true, libgpod, gnome3, hicolor_icon_theme }:
+  ipodSupport ? true, libgpod, gnome3 }:
 
 with pkgs.lib;
 
@@ -7,17 +7,16 @@ let
   inherit (pythonPackages) coverage feedparser minimock sqlite3 dbus pygtk eyeD3;
 
 in buildPythonPackage rec {
-  name = "gpodder-3.8.3";
+  name = "gpodder-3.8.4";
 
   src = fetchurl {
     url = "http://gpodder.org/src/${name}.tar.gz";
-    sha256 = "8ac120a6084bded6bc88ecadbbc9df54a85f44ef4507f73a76de1d7a5574303c";
+    sha256 = "0cjpk92qjsws7ddbnq0r2h7vm5019zlpafgbxwsgllmjzkknj6pn";
   };
 
   buildInputs = [
-    coverage feedparser minimock sqlite3 mygpoclient intltool
-    gnome3.gnome_themes_standard gnome3.gnome_icon_theme
-    gnome3.gnome_icon_theme_symbolic hicolor_icon_theme
+    coverage minimock sqlite3 mygpoclient intltool
+    gnome3.gnome_themes_standard gnome3.defaultIconTheme
     gnome3.gsettings_desktop_schemas
   ];
 
@@ -27,8 +26,6 @@ in buildPythonPackage rec {
     ++ stdenv.lib.optional ipodSupport libgpod;
 
   postPatch = "sed -ie 's/PYTHONPATH=src/PYTHONPATH=\$(PYTHONPATH):src/' makefile";
-
-  checkPhase = "make unittest";
 
   preFixup = ''
     wrapProgram $out/bin/gpodder \
@@ -40,17 +37,6 @@ in buildPythonPackage rec {
   # the wrapped file.
   postFixup = ''
     wrapPythonPrograms
-
-    if test -e $out/nix-support/propagated-build-inputs; then
-        ln -s $out/nix-support/propagated-build-inputs $out/nix-support/propagated-user-env-packages
-    fi
-
-    createBuildInputsPth build-inputs "$buildInputStrings"
-    for inputsfile in propagated-build-inputs propagated-native-build-inputs; do
-      if test -e $out/nix-support/$inputsfile; then
-          createBuildInputsPth $inputsfile "$(cat $out/nix-support/$inputsfile)"
-      fi
-    done
 
     sed -i "$out/bin/..gpodder-wrapped-wrapped" -e '{
         /import sys; sys.argv/d

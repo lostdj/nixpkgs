@@ -1,5 +1,5 @@
 { stdenv
-, fetchurl
+, fetchFromGitHub
 , cmake
 , ffmpeg
 , jansson
@@ -7,25 +7,38 @@
 , qt5
 , libv4l
 , x264
+, curl
+
+, pulseaudioSupport ? false
+, libpulseaudio
 }:
 
-stdenv.mkDerivation rec {
+let
+  optional = stdenv.lib.optional;
+in stdenv.mkDerivation rec {
   name = "obs-studio-${version}";
-  version = "0.9.1";
+  version = "0.12.1";
 
-  src = fetchurl {
-    url = "https://github.com/jp9000/obs-studio/archive/${version}.tar.gz";
-    sha256 = "198ymfdrg58i3by58fs68df835rkpnpagnvyzlilmn9ypvpa8h81";
+  src = fetchFromGitHub {
+    owner = "jp9000";
+    repo = "obs-studio";
+    rev = "${version}";
+    sha256 = "0n5bpjgdk3gi0xghfhphiyh5r1q1yksaz34as306i051y01shzl6";
   };
 
-  buildInputs = [ cmake
+  nativeBuildInputs = [ cmake
+                      ];
+
+  buildInputs = [ curl
                   ffmpeg
                   jansson
                   libv4l
                   libxkbcommon
                   qt5.base
+                  qt5.x11extras
                   x264
-                ];
+                ]
+                ++ optional pulseaudioSupport libpulseaudio;
 
   # obs attempts to dlopen libobs-opengl, it fails unless we make sure
   # DL_OPENGL is an explicit path. Not sure if there's a better way

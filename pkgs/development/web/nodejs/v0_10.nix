@@ -1,14 +1,12 @@
 { stdenv, fetchurl, openssl, python, zlib, v8, utillinux, http-parser, c-ares
-, pkgconfig, runCommand, which
+, pkgconfig, runCommand, which, libtool
+
+# apple frameworks
+, CoreServices, ApplicationServices, Carbon, Foundation
 }:
 
 let
-  dtrace = runCommand "dtrace-native" {} ''
-    mkdir -p $out/bin
-    ln -sv /usr/sbin/dtrace $out/bin
-  '';
-
-  version = "0.10.38";
+  version = "0.10.40";
 
   # !!! Should we also do shared libuv?
   deps = {
@@ -34,25 +32,36 @@ in stdenv.mkDerivation {
 
   src = fetchurl {
     url = "http://nodejs.org/dist/v${version}/node-v${version}.tar.gz";
-    sha256 = "12xpa9jzry5g0j41908498qqs8v0q6miqkv6mggyzas8bvnshgai";
+    sha256 = "17qlk4adjk1ls8ka4gbmvcl02xmvxdxhfdmg54bbxbjrv4prrrxs";
   };
 
-  configureFlags = concatMap sharedConfigureFlags (builtins.attrNames deps);
+  configureFlags = concatMap sharedConfigureFlags (builtins.attrNames deps) ++
+    stdenv.lib.optional stdenv.isDarwin "--without-dtrace";
 
   prePatch = ''
-    sed -e 's|^#!/usr/bin/env python$|#!${python}/bin/python|g' -i configure
+    patchShebangs .
   '';
 
-  patches = if stdenv.isDarwin then [ ./no-xcode.patch ] else null;
+  patches = stdenv.lib.optionals stdenv.isDarwin [ ./default-arch.patch ./no-xcode.patch ];
 
-  postPatch = if stdenv.isDarwin then ''
+  postPatch = stdenv.lib.optionalString stdenv.isDarwin ''
     (cd tools/gyp; patch -Np1 -i ${../../python-modules/gyp/no-darwin-cflags.patch})
-  '' else null;
+  '';
 
   buildInputs = [ python which ]
     ++ (optional stdenv.isLinux utillinux)
-    ++ optionals stdenv.isDarwin [ pkgconfig openssl dtrace ];
+    ++ optionals stdenv.isDarwin [ pkgconfig openssl libtool CoreServices ApplicationServices Foundation ];
+  propagatedBuildInputs = optionals stdenv.isDarwin [ Carbon ];
   setupHook = ./setup-hook.sh;
+
+  enableParallelBuilding = true;
+
+  postFixup = ''
+    pushd $out/lib/node_modules/npm/node_modules/node-gyp
+    patch -p2 < ${./no-xcode.patch}
+    popd
+    sed -i 's/raise.*No Xcode or CLT version detected.*/version = "7.0.0"/' $out/lib/node_modules/npm/node_modules/node-gyp/gyp/pylib/gyp/xcode_emulation.py
+  '';
 
   passthru.interpreterName = "nodejs-0.10";
 
@@ -60,7 +69,6 @@ in stdenv.mkDerivation {
     description = "Event-driven I/O framework for the V8 JavaScript engine";
     homepage = http://nodejs.org;
     license = licenses.mit;
-    maintainers = [ maintainers.goibhniu maintainers.shlevy ];
     platforms = platforms.linux ++ platforms.darwin;
   };
 }

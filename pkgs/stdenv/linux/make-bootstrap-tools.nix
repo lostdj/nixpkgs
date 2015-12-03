@@ -10,6 +10,12 @@ rec {
     aclSupport = false;
   });
 
+  curlMinimal = curl.override {
+    zlibSupport = false;
+    sslSupport = false;
+    scpSupport = false;
+  };
+
   busyboxMinimal = busybox.override {
     useMusl = true;
     enableStatic = true;
@@ -28,7 +34,7 @@ rec {
   build =
 
     stdenv.mkDerivation {
-      name = "build";
+      name = "stdenv-bootstrap-tools";
 
       buildInputs = [nukeReferences cpio];
 
@@ -77,8 +83,8 @@ rec {
         cp -d ${gnumake}/bin/* $out/bin
         cp -d ${patch}/bin/* $out/bin
         cp ${patchelf}/bin/* $out/bin
-        cp ${curl-light}/bin/curl $out/bin
-        cp -d ${curl-light}/lib/libcurl* $out/lib
+        cp ${curlMinimal}/bin/curl $out/bin
+        cp -d ${curlMinimal}/lib/libcurl* $out/lib
 
         cp -d ${gnugrep.pcre}/lib/libpcre*.so* $out/lib # needed by grep
 
@@ -148,9 +154,19 @@ rec {
       allowedReferences = [];
     };
 
+  dist = stdenv.mkDerivation {
+    name = "stdenv-bootstrap-tools";
+
+    buildCommand = ''
+      mkdir -p $out/nix-support
+      echo "file tarball ${build}/on-server/bootstrap-tools.tar.xz" >> $out/nix-support/hydra-build-products
+      echo "file busybox ${build}/on-server/busybox" >> $out/nix-support/hydra-build-products
+    '';
+  };
+
   test = ((import ./default.nix) {
     inherit system;
-    
+
     customBootstrapFiles = {
       busybox = "${build}/on-server/busybox";
       bootstrapTools = "${build}/on-server/bootstrap-tools.tar.xz";
