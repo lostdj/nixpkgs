@@ -85,6 +85,8 @@ in modules // {
 
   blivet = callPackage ../development/python-modules/blivet { };
 
+  pylint = callPackage ../development/python-modules/pylint { };
+
   dbus = callPackage ../development/python-modules/dbus {
     dbus = pkgs.dbus;
   };
@@ -228,6 +230,21 @@ in modules // {
     };
   };
 
+  acme = buildPythonPackage rec {
+    inherit (pkgs.letsencrypt) src version;
+
+    name = "acme-${version}";
+
+    propagatedBuildInputs = with self; [
+      cryptography pyasn1 pyopenssl pyRFC3339 pytz requests2 six werkzeug mock
+      ndg-httpsclient
+    ];
+
+    buildInputs = with self; [ nose ];
+
+    sourceRoot = "letsencrypt-${version}/acme";
+  };
+
   actdiag = buildPythonPackage rec {
     name = "actdiag-0.5.3";
 
@@ -355,6 +372,30 @@ in modules // {
     meta = with stdenv.lib; {
       description = "`python-editor` is a library that provides the `editor` module for programmatically";
       homepage = "https://github.com/fmoo/python-editor";
+    };
+  };
+
+  python-gnupg = buildPythonPackage rec {
+    name    = "python-gnupg-${version}";
+    version = "0.3.8";
+
+    src = pkgs.fetchurl {
+      url    = "https://pypi.python.org/packages/source/p/python-gnupg/${name}.tar.gz";
+      sha256 = "0nkbs9c8f30lra7ca39kg91x8cyxn0jb61vih4qky839gpbwwwiq";
+    };
+
+    # Let's make the library default to our gpg binary
+    patchPhase = ''
+      substituteInPlace gnupg.py \
+        --replace "gpgbinary='gpg'" "gpgbinary='${pkgs.gnupg}/bin/gpg'"
+    '';
+
+    meta = {
+      description = "A wrapper for the Gnu Privacy Guard";
+      homepage    = "https://pypi.python.org/pypi/python-gnupg";
+      license     = licenses.bsd3;
+      maintainers = with maintainers; [ copumpkin ];
+      platforms   = platforms.unix;
     };
   };
 
@@ -1704,11 +1745,13 @@ in modules // {
 
   boto3 = buildPythonPackage rec {
     name = "boto3-${version}";
-    version = "1.1.4";
+    version = "1.2.2";
 
-    src = pkgs.fetchurl {
-      url = "https://github.com/boto/boto3/archive/${version}.zip";
-      sha256 = "11fdfbq8ann11wdzmbd0djnb1biyyhs1jcc8maxmkcj2q9fw6dk0";
+    src = pkgs.fetchFromGitHub {
+      owner = "boto";
+      repo  = "boto3";
+      rev   = version;
+      sha256 = "1w53lhhdzi29d31qzhflb5mcwb24mfrj4frv70w6qyn8vmqznnjy";
     };
 
     propagatedBuildInputs = [ self.botocore
@@ -1733,44 +1776,17 @@ in modules // {
   };
 
   botocore = buildPythonPackage rec {
-    version = "1.2.0";
+    version = "1.3.6";
     name = "botocore-${version}";
 
     src = pkgs.fetchurl {
       url = "https://pypi.python.org/packages/source/b/botocore/${name}.tar.gz";
-      sha256 = "0wj98fsiwqzy0i0zh86fx15sgdjkwqi6crxig6b4kvrckl8bkwjr";
+      sha256 = "05a0ihv66fx77j16mjlm76d8zm7sd5wfzh1hx4nm3ilb9gz5h016";
     };
 
     propagatedBuildInputs =
       [ self.dateutil
-        self.requests
-        self.jmespath
-      ];
-
-    buildInputs = [ self.docutils ];
-
-    meta = {
-      homepage = https://github.com/boto/botocore;
-
-      license = "bsd";
-
-      description = "A low-level interface to a growing number of Amazon Web Services";
-
-    };
-  };
-
-  botocore_1_1_10 = buildPythonPackage rec {
-    version = "1.1.10";
-    name = "botocore-${version}";
-
-    src = pkgs.fetchurl {
-      url = "https://pypi.python.org/packages/source/b/botocore/${name}.tar.gz";
-      sha256 = "0syj0m0l7k4wa0n9h7h8ywayjv9fgpn5wyzpdriws0j417y1zlyc";
-    };
-
-    propagatedBuildInputs =
-      [ self.dateutil
-        self.requests
+        self.requests2
         self.jmespath
       ];
 
@@ -5073,6 +5089,27 @@ in modules // {
     };
   };
 
+  python-mapnik = buildPythonPackage {
+    name = "python-mapnik-fae6388";
+
+    src = pkgs.fetchgit {
+      url = https://github.com/mapnik/python-mapnik.git;
+      rev = "fae63881ed0945829e73f711d52740240b740936";
+      sha256 = "13i9zsy0dk9pa947vfq26a3nrn1ddknqliyb0ljcmi5w5x0z758k";
+    };
+
+    disabled = isPyPy;
+    doCheck = false; # doesn't find needed test data files
+    buildInputs = with pkgs; [ boost harfbuzz icu mapnik ];
+    propagatedBuildInputs = with self; [ pillow pycairo ];
+
+    meta = with stdenv.lib; {
+      description = "Python bindings for Mapnik";
+      homepage = http://mapnik.org;
+      license  = licenses.lgpl21;
+    };
+  };
+
   mwlib = buildPythonPackage rec {
     version = "0.15.15";
     name = "mwlib-${version}";
@@ -6404,6 +6441,16 @@ in modules // {
   };
 
   django = self.django_1_7;
+
+  django_gis = self.django.override rec {
+    patches = [
+      (pkgs.substituteAll {
+        src = ../development/python-modules/django/1.7.7-gis-libs.template.patch;
+        geos = pkgs.geos;
+        gdal = pkgs.gdal;
+      })
+    ];
+  };
 
   django_1_8 = buildPythonPackage rec {
     name = "Django-${version}";
@@ -7934,29 +7981,6 @@ in modules // {
       homepage = http://gehrcke.de/gipc;
       license = licenses.mit;
       maintainers = with maintainers; [ nckx ];
-    };
-  };
-
-  glance = buildPythonPackage rec {
-    name = "glance-0.1.7";
-
-    src = pkgs.fetchurl {
-      url = "http://pypi.python.org/packages/source/g/glance/${name}.tar.gz";
-      md5 = "e733713ccd23e4a6253386a47971cfb5";
-    };
-
-    buildInputs = with self; [ nose mox ];
-
-    # tests fail for python2.6
-    doCheck = python.majorVersion != "2.6";
-
-    propagatedBuildInputs = with self; [ gflags sqlalchemy webob routes eventlet ];
-
-    PYTHON_EGG_CACHE = "`pwd`/.egg-cache";
-
-    meta = {
-      homepage = https://launchpad.net/glance;
-      description = "Services for discovering, registering, and retrieving virtual machine images";
     };
   };
 
@@ -9846,6 +9870,24 @@ in modules // {
     };
   });
 
+  modestmaps = buildPythonPackage rec {
+    name = "ModestMaps-1.4.6";
+
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/source/M/ModestMaps/${name}.tar.gz";
+      sha256 = "0vyi1m9q4pc34i6rq5agb4x3qicx5sjlbxwmxfk70k2l5mnbjca3";
+    };
+
+    disabled = !isPy27;
+    propagatedBuildInputs = with self; [ pillow ];
+
+    meta = {
+      description = "A library for building interactive maps";
+      homepage = http://modestmaps.com;
+      license = stdenv.lib.licenses.bsd3;
+    };
+  };
+
   moinmoin = buildPythonPackage (rec {
     name = "moinmoin-${ver}";
     disabled = isPy3k;
@@ -10201,6 +10243,8 @@ in modules // {
 
   monotonic = buildPythonPackage rec {
     name = "monotonic-0.4";
+
+    __propagatedImpureHostDeps = stdenv.lib.optional stdenv.isDarwin "/usr/lib/libc.dylib";
 
     src = pkgs.fetchurl {
       url = "http://pypi.python.org/packages/source/m/monotonic/${name}.tar.gz";
@@ -11718,6 +11762,13 @@ in modules // {
       sha256 = "1711rlmykizw675ihbaqmk3ph6ah0njbygxr9lrdnacy6yrlmbd5";
     };
 
+    # https://bugs.launchpad.net/oslo.rootwrap/+bug/1519839
+    patchPhase = ''
+     substituteInPlace oslo_rootwrap/filters.py \
+       --replace "/bin/cat" "${pkgs.coreutils}/bin/cat" \
+       --replace "/bin/kill" "${pkgs.coreutils}/bin/kill"
+    '';
+
     buildInputs = with self; [ eventlet mock oslotest ];
     propagatedBuildInputs = with self; [
       six pbr
@@ -12343,9 +12394,9 @@ in modules // {
     };
 
     propagatedBuildInputs = with self; [
-      pbr Babel six iso8601 debtcollector pyinotify
+      pbr Babel six iso8601 debtcollector
       oslo-utils oslo-i18n oslo-config oslo-serialization oslo-context
-    ];
+    ] ++ stdenv.lib.optional stdenv.isLinux pyinotify;
     buildInputs = with self; [ oslotest oslosphinx ];
     patchPhase = ''
       sed -i 's@python@${python.interpreter}@' .testr.conf
@@ -12555,7 +12606,7 @@ in modules // {
       (if isPy35 then null else html5lib)
       modules.sqlite3
       beautifulsoup4
-    ] ++ optional isDarwin pkgs.darwin.adv_cmds; # provides the locale command
+    ] ++ optional isDarwin pkgs.darwin.locale; # provides the locale command
 
     # For OSX, we need to add a dependency on libcxx, which provides
     # `complex.h` and other libraries that pandas depends on to build.
@@ -13602,6 +13653,7 @@ in modules // {
       sha256 = "07ivzl7bq8bjcq5n90w4bsl29gjfm5l8yamw0paxh25si8r3zfi4";
     };
 
+    buildInputs = optional stdenv.isDarwin pkgs.openssl;
     propagatedBuildInputs = with self; [ pkgs.postgresql ];
 
     meta = {
@@ -16964,6 +17016,27 @@ in modules // {
     meta = {
       homepage = " http://countergram.com/open-source/pytidylib/";
       maintainers = with maintainers; [ layus ];
+    };
+  };
+
+  tilestache = self.buildPythonPackage rec {
+    name = "tilestache-${version}";
+    version = "1.50.1";
+
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/source/T/TileStache/TileStache-${version}.tar.gz";
+      sha256 = "1z1j35pz77lhhjdn69sq5rmz62b5m444507d8zjnp0in5xqaj6rj";
+    };
+
+    disabled = !isPy27;
+
+    propagatedBuildInputs = with self;
+      [ modestmaps pillow pycairo python-mapnik simplejson werkzeug ];
+
+    meta = {
+      description = "A tile server for rendered geographic data";
+      homepage = http://tilestache.org;
+      license = licenses.bsd3;
     };
   };
 
@@ -21760,6 +21833,8 @@ in modules // {
       sed -i -e "s|test_open_unix_connection_error|skip_test_open_unix_connection_error|" tests/test_streams.py
       sed -i -e "s|test_open_unix_connection_no_loop_ssl|skip_test_open_unix_connection_no_loop_ssl|" tests/test_streams.py
       sed -i -e "s|test_open_unix_connection|skip_test_open_unix_connection|" tests/test_streams.py
+      sed -i -e "s|test_read_pty_output|skip_test_read_pty_output|" tests/test_events.py
+      sed -i -e "s|test_write_pty|skip_test_write_pty|" tests/test_events.py
       sed -i -e "s|test_start_unix_server|skip_test_start_unix_server|" tests/test_streams.py
       sed -i -e "s|test_unix_sock_client_ops|skip_test_unix_sock_client_ops|" tests/test_events.py
       sed -i -e "s|test_unix_sock_client_ops|skip_test_unix_sock_client_ops|" tests/test_events.py
@@ -22004,6 +22079,11 @@ in modules // {
       url = "https://pypi.python.org/packages/source/x/xcffib/${name}.tar.gz";
       md5 = "fa13f3fee67c83016a1242982a7c8bda";
     };
+
+    patchPhase = ''
+      # Hardcode cairo library path
+      sed -e 's,ffi\.dlopen(,&"${pkgs.xorg.libxcb}/lib/" + ,' -i xcffib/__init__.py
+    '';
 
     propagatedBuildInputs = [ self.cffi self.six ];
 
